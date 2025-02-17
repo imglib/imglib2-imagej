@@ -120,32 +120,4 @@ public class ImagePlusImgFactory< T extends NativeType< T > > extends PlanarImgF
 			return new ImagePlusImgFactory( ( NativeType ) type );
 		throw new IncompatibleTypeException( this, type.getClass().getCanonicalName() + " does not implement NativeType." );
 	}
-
-	/*
-	 * -----------------------------------------------------------------------
-	 *
-	 * Deprecated API.
-	 *
-	 * Supports backwards compatibility with ImgFactories that are constructed
-	 * without a type instance or supplier.
-	 *
-	 * -----------------------------------------------------------------------
-	 */
-
-	@Deprecated
-	public ImagePlusImgFactory()
-	{
-		super();
-	}
-
-	@Deprecated
-	@Override
-	public ImagePlusImg< T, ? > create( final long[] dimensions, final T type )
-	{
-		cache( type );
-		@SuppressWarnings( { "unchecked", "rawtypes" } )
-		final ImagePlusImg< T, ? > img = create( dimensions, type, ( NativeTypeFactory ) type.getNativeTypeFactory() );
-		return img;
-	}
-
 }
