@@ -38,7 +38,6 @@ import static org.junit.Assert.assertTrue;
 
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.ImgTestHelper;
 import net.imglib2.util.Util;
 
 import org.junit.Test;
