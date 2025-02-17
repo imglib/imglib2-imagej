@@ -135,7 +135,7 @@ public class ImgPlusViews
 		if ( d < 0 || image.dimension( d ) != 3 )
 			throw new IllegalArgumentException();
 		return Converters.convert(
-				Views.collapse( moveAxis( image, d, image.numDimensions() - 1 ) ),
+				Views.collapse( Views.moveAxis( image, d, image.numDimensions() - 1 ) ),
 				ImgPlusViews::convertToColor,
 				new ARGBType() );
 	}
@@ -166,18 +166,6 @@ public class ImgPlusViews
 		for ( int i = 0; i < result.numDimensions(); i++ )
 			result.setAxis( image.axis( axesMapping.applyAsInt( i ) ).copy(), i );
 		return result;
-	}
-
-	// TODO: move to imglib2 Views
-	private static < T > RandomAccessibleInterval< T > moveAxis( final RandomAccessibleInterval< T > image, final int fromAxis, final int toAxis )
-	{
-		if ( fromAxis == toAxis )
-			return image;
-		final int direction = toAxis > fromAxis ? 1 : -1;
-		RandomAccessibleInterval< T > res = image;
-		for ( int i = fromAxis; i != toAxis; i += direction )
-			res = Views.permute( res, i, i + direction );
-		return res;
 	}
 
 	private static void convertToColor( final Composite< ? extends RealType< ? > > in, final ARGBType out )
