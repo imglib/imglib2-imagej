@@ -44,7 +44,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.imagej.imageplus.VirtualStackAdapter;
+import net.imglib2.imagej.ImagePlusToImgPlus;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.basictypeaccess.array.IntArray;
 import net.imglib2.img.planar.PlanarImg;
@@ -165,7 +165,7 @@ public class PlanarImgToVirtualStackTest
 	@Test
 	public void testConvertingBackAndForth() {
 		ImagePlus imagePlus = IJ.createImage( "test", "8-bit ramp", 3, 3, 3 );
-		ImgPlus< UnsignedByteType > convertedImg = VirtualStackAdapter.wrapByte( imagePlus );
+		ImgPlus< UnsignedByteType > convertedImg = ImagePlusToImgPlus.wrapByteLazily( imagePlus );
 		ImagePlus twiceConvertedImagePlus = PlanarImgToVirtualStack.wrap( convertedImg );
 		twiceConvertedImagePlus.getStack().getProcessor( 1 ).set( 0, 0, 5 );
 		assertEquals( 5, imagePlus.getStack().getProcessor( 1 ).get( 0, 0 ) );

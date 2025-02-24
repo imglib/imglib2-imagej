@@ -36,12 +36,18 @@ package net.imglib2.imagej;
 
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
+import net.imagej.axis.CalibratedAxis;
 import net.imglib2.Cursor;
+import net.imglib2.cache.Cache;
+import net.imglib2.cache.ref.SoftRefLoaderCache;
 import net.imglib2.converter.Converter;
 import net.imglib2.imagej.display.CalibrationUtils;
 import net.imglib2.imagej.imageplus.*;
 import net.imglib2.img.Img;
+import net.imglib2.img.basictypeaccess.array.*;
+import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
@@ -52,15 +58,25 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 
 import ij.ImagePlus;
+import net.imglib2.util.Fraction;
+
+import java.util.AbstractList;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
+import java.util.stream.LongStream;
 
 /**
  * Provides convenience functions to wrap ImageJ 1.x data structures as ImgLib2
  * ones.
+ * <p>
+ * Some functions wrap lazily, using imglib2-caches. These functions load
+ * planes on-demand, which is especially useful when wrapping a virtual stack.
+ * </p>
  *
- * @see ImageJFunctions
  *
  * @author Stephan Preibisch
  * @author Stephan Saalfeld
+ * @author Matthias Arzt
  */
 public class ImagePlusToImgPlus
 {
@@ -242,6 +258,106 @@ public class ImagePlusToImgPlus
 		}
 	}
 
+	// -- Lazy conversions -- //
+
+	/**
+	 * Wraps a 8 bit {@link ImagePlus}, into an {@link ImgPlus}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them. The axes of the returned image are set according
+	 * to the calibration of the given image.
+	 */
+	public static ImgPlus< UnsignedByteType > wrapByteLazily(final ImagePlus image )
+	{
+		return internWrapLazily( image, ImagePlus.GRAY8, new UnsignedByteType(), array -> new ByteArray( ( byte[] ) array ) );
+	}
+
+	/**
+	 * Wraps a 16 bit {@link ImagePlus}, into an {@link ImgPlus}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them. The axes of the returned image are set according
+	 * to the calibration of the given image.
+	 */
+	public static ImgPlus< UnsignedShortType > wrapShortLazily(final ImagePlus image )
+	{
+		return internWrapLazily( image, ImagePlus.GRAY16, new UnsignedShortType(), array -> new ShortArray( ( short[] ) array ) );
+	}
+
+	/**
+	 * Wraps a 32 bit {@link ImagePlus}, into an {@link ImgPlus}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them. The axes of the returned image are set according
+	 * to the calibration of the given image.
+	 */
+	public static ImgPlus< FloatType > wrapFloatLazily(final ImagePlus image )
+	{
+		return internWrapLazily( image, ImagePlus.GRAY32, new FloatType(), array -> new FloatArray( ( float[] ) array ) );
+	}
+
+	/**
+	 * Wraps a 32 bit {@link ImagePlus}, into an {@link ImgPlus}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them. The axes of the returned image are set according
+	 * to the calibration of the given image.
+	 */
+	public static ImgPlus< UnsignedIntType > wrapIntLazily(final ImagePlus image )
+	{
+		return internWrapLazily( image, ImagePlus.COLOR_RGB, new UnsignedIntType(), array -> new IntArray( ( int[] ) array ) );
+	}
+
+	/**
+	 * Wraps a 24 bit {@link ImagePlus}, into an {@link ImgPlus}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them. The axes of the returned image are set according
+	 * to the calibration of the given image.
+	 */
+	public static ImgPlus< ARGBType > wrapRGBALazily(final ImagePlus image )
+	{
+		return internWrapLazily( image, ImagePlus.COLOR_RGB, new ARGBType(), array -> new IntArray( ( int[] ) array ) );
+	}
+
+	/**
+	 * Wraps an {@link ImagePlus}, into an {@link ImgPlus}, that is backed by a
+	 * {@link PlanarImg}. The {@link PlanarImg} loads the planes only if needed,
+	 * and caches them. The pixel type of the returned image depends on the type
+	 * of the ImagePlus. The axes of the returned image are set according to the
+	 * calibration of the given image.
+	 */
+	public static ImgPlus< ? > wrapLazily(final ImagePlus image )
+	{
+		switch ( image.getType() )
+		{
+		case ImagePlus.GRAY8:
+			return wrapByteLazily( image );
+		case ImagePlus.GRAY16:
+			return wrapShortLazily( image );
+		case ImagePlus.GRAY32:
+			return wrapFloatLazily( image );
+		case ImagePlus.COLOR_RGB:
+			return wrapRGBALazily( image );
+		}
+		throw new RuntimeException( "Only 8, 16, 32-bit and RGB supported!" );
+	}
+
+	private static < T extends NativeType< T >, A extends ArrayDataAccess< A > > ImgPlus< T > internWrapLazily(final ImagePlus image, final int expectedType, final T type, final Function< Object, A > createArrayAccess )
+	{
+		if ( image.getType() != expectedType )
+			throw new IllegalArgumentException();
+		final ImagePlusLoader< A > loader = new ImagePlusLoader<>( image, createArrayAccess );
+		final long[] dimensions = getNonTrivialDimensions( image );
+		final PlanarImg< T, A > cached = new PlanarImg<>( loader, dimensions, new Fraction() );
+		cached.setLinkedType( ( (NativeTypeFactory< T, A >) type.getNativeTypeFactory() ).createLinkedType( cached ) );
+		final CalibratedAxis[] axes = CalibrationUtils.getNonTrivialAxes( image );
+		final ImgPlus< T > wrap = new ImgPlus<>( cached, image.getTitle(), axes );
+		return wrap;
+	}
+
+	private static long[] getNonTrivialDimensions(final ImagePlus image )
+	{
+		final LongStream xy = LongStream.of( image.getWidth(), image.getHeight() );
+		final LongStream czt = LongStream.of( image.getNChannels(), image.getNSlices(), image.getNFrames() );
+		return LongStream.concat( xy, czt.filter( x -> x > 1 ) ).toArray();
+	}
+
 	static private class ARGBtoFloatConverter implements Converter< ARGBType, FloatType >
 	{
 		/** Luminance times alpha. */
@@ -280,4 +396,46 @@ public class ImagePlusToImgPlus
 
 		return output;
 	}
+
+	private static class ImagePlusLoader< A extends ArrayDataAccess< A >> extends AbstractList< A >
+	{
+		private final ImagePlus image;
+
+		private final Cache< Integer, A > cache;
+
+		private final Function< Object, A > arrayFactory;
+
+		public ImagePlusLoader( final ImagePlus image, final Function< Object, A > arrayFactory )
+		{
+			this.arrayFactory = arrayFactory;
+			this.image = image;
+			cache = new SoftRefLoaderCache< Integer, A >().withLoader( this::load );
+		}
+
+		@Override
+		public A get( final int key )
+		{
+			try
+			{
+				return cache.get( key );
+			}
+			catch ( final ExecutionException e )
+			{
+				throw new RuntimeException( e );
+			}
+		}
+
+		private A load( final Integer key )
+		{
+			return arrayFactory.apply( image.getStack().getPixels( key + 1 ) );
+		}
+
+		@Override
+		public int size()
+		{
+			return image.getStackSize();
+		}
+	}
+
+	//
 }
