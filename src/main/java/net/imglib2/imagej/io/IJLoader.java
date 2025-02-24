@@ -35,8 +35,8 @@ package net.imglib2.imagej.io;
 
 import ij.IJ;
 import net.imglib2.cache.CacheLoader;
+import net.imglib2.imagej.ImagePlusToImgPlus;
 import net.imglib2.img.Img;
-import net.imglib2.imagej.ImageJFunctions;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
@@ -45,7 +45,7 @@ import net.imglib2.type.numeric.NumericType;
  * An ImageJ-powered implementation of a disk-based {@link CacheLoader}:
  * the file system is the cache, and requests to load image file paths
  * are executed using ImageJ's {@link IJ#openImage(java.lang.String)},
- * and wrapped as {@link PlanarImg} via the {@link ImageJFunctions#wrap(ij.ImagePlus)}.
+ * and wrapped as {@link PlanarImg} via the {@link net.imglib2.imagej.ImagePlusToImgPlus#wrap(ij.ImagePlus)}.
  * 
  * @author Albert Cardona
  *
@@ -56,6 +56,6 @@ public class IJLoader< T extends NumericType< T > & NativeType< T > > implements
 	@Override
 	public Img< T > get( final String path )
 	{
-		return ImageJFunctions.wrap( IJ.openImage( path ) );
+		return ImagePlusToImgPlus.wrap( IJ.openImage( path ) );
 	}
 }

@@ -46,10 +46,10 @@ import ij.process.ShortProcessor;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CachedCellImg;
+import net.imglib2.imagej.ImagePlusToImgPlus;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
-import net.imglib2.imagej.ImageJFunctions;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
@@ -125,7 +125,7 @@ public class LoadTest
 	{
 		final RandomAccessibleInterval< ? > img = Views.stack( Arrays.stream( paths )
 				.map( IJ::openImage )
-				.map( ImageJFunctions::wrap )
+				.map( ImagePlusToImgPlus::wrap )
 				.collect( Collectors.toList() ) );
 		
 		show( ( RandomAccessibleInterval< UnsignedShortType > )img, "stack", 1, ( int )img.dimension( 2 ), ( int )img.dimension( 3 ) );
