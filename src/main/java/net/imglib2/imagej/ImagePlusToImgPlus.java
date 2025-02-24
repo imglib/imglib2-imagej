@@ -32,14 +32,14 @@
  * #L%
  */
 
-package net.imglib2.imagej.imageplus;
+package net.imglib2.imagej;
 
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.Cursor;
 import net.imglib2.converter.Converter;
 import net.imglib2.imagej.display.CalibrationUtils;
-import net.imglib2.imagej.ImageJFunctions;
+import net.imglib2.imagej.imageplus.*;
 import net.imglib2.img.Img;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
@@ -62,10 +62,10 @@ import ij.ImagePlus;
  * @author Stephan Preibisch
  * @author Stephan Saalfeld
  */
-public class ImagePlusAdapter
+public class ImagePlusToImgPlus
 {
 	@SuppressWarnings( "unchecked" )
-	public static < T extends NumericType< T > & NativeType< T > > ImagePlusImg< T, ? > wrap( final ImagePlus imp )
+	public static < T extends NumericType< T > & NativeType< T > > ImagePlusImg< T, ? > wrap(final ImagePlus imp )
 	{
 		return ( ImagePlusImg< T, ? > ) wrapLocal( imp );
 	}
@@ -144,7 +144,7 @@ public class ImagePlusAdapter
 
 	}
 
-	public static ByteImagePlus< UnsignedByteType > wrapByte( final ImagePlus imp )
+	public static ByteImagePlus< UnsignedByteType > wrapByte(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.GRAY8 )
 			return null;
@@ -160,7 +160,7 @@ public class ImagePlusAdapter
 		return container;
 	}
 
-	public static ShortImagePlus< UnsignedShortType > wrapShort( final ImagePlus imp )
+	public static ShortImagePlus< UnsignedShortType > wrapShort(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.GRAY16 )
 			return null;
@@ -176,7 +176,7 @@ public class ImagePlusAdapter
 		return container;
 	}
 
-	public static IntImagePlus< UnsignedIntType > wrapInt( final ImagePlus imp )
+	public static IntImagePlus< UnsignedIntType > wrapInt(final ImagePlus imp )
 	{
 		if( imp.getType() != ImagePlus.COLOR_RGB )
 			return null;
@@ -208,7 +208,7 @@ public class ImagePlusAdapter
 		return container;
 	}
 
-	public static FloatImagePlus< FloatType > wrapFloat( final ImagePlus imp )
+	public static FloatImagePlus< FloatType > wrapFloat(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.GRAY32 )
 			return null;

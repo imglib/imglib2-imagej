@@ -50,9 +50,7 @@ import net.imglib2.imagej.display.ImageJVirtualStackARGB;
 import net.imglib2.imagej.display.ImageJVirtualStackFloat;
 import net.imglib2.imagej.display.ImageJVirtualStackUnsignedByte;
 import net.imglib2.imagej.display.ImageJVirtualStackUnsignedShort;
-import net.imglib2.imagej.imageplus.ImagePlusAdapter;
 import net.imglib2.img.Img;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.ComplexType;
@@ -60,7 +58,6 @@ import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
@@ -94,64 +91,6 @@ import ij.VirtualStack;
 public class ImageJFunctions
 {
 	final static AtomicInteger ai = new AtomicInteger();
-
-	public static < T extends NumericType< T > & NativeType< T > > Img< T > wrap( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrap( imp );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	public static < T extends RealType< T > > Img< T > wrapReal( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapReal( imp );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	public static < T extends RealType< T > & NativeType< T > > Img< T > wrapRealNative( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapReal( imp );
-	}
-
-	@SuppressWarnings( "unchecked" )
-	public static < T extends NumericType< T > > Img< T > wrapNumeric( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapNumeric( imp );
-	}
-
-	public static < T extends NumericType< T > & NativeType< T > > Img< T > wrapNumericNative( final ImagePlus imp )
-	{
-		return wrap( imp );
-	}
-
-	public static Img< UnsignedByteType > wrapByte( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapByte( imp );
-	}
-
-	public static Img< UnsignedShortType > wrapShort( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapShort( imp );
-	}
-
-	public static Img< UnsignedIntType > wrapInt( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapInt( imp );
-	}
-
-	public static Img< ARGBType > wrapRGBA( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapRGBA( imp );
-	}
-
-	public static Img< FloatType > wrapFloat( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.wrapFloat( imp );
-	}
-
-	public static Img< FloatType > convertFloat( final ImagePlus imp )
-	{
-		return ImagePlusAdapter.convertFloat( imp );
-	}
 
 	/**
 	 * Display and return a single channel {@link ImagePlus}, wrapping a

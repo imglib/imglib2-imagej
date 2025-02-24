@@ -35,6 +35,7 @@
 package net.imglib2.imagej.display;
 
 import net.imglib2.imagej.ImageJFunctions;
+import net.imglib2.imagej.ImagePlusToImgPlus;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -69,36 +70,36 @@ public class ImageJFunctionBehavior
 
 		// 1. Test ImagePlus -> Img, specific wrappers
 		IJ.run( imp, "8-bit", "" );
-		final Img< UnsignedByteType > imgb = ImageJFunctions.wrapByte( imp );
+		final Img< UnsignedByteType > imgb = ImagePlusToImgPlus.wrapByte( imp );
 		print( imgb );
 
 		IJ.run( imp, "16-bit", "" );
-		final Img< UnsignedShortType > imgs = ImageJFunctions.wrapShort( imp );
+		final Img< UnsignedShortType > imgs = ImagePlusToImgPlus.wrapShort( imp );
 		print( imgs );
 
 		IJ.run( imp, "32-bit", "" );
-		final Img< FloatType > imgf = ImageJFunctions.wrapFloat( imp );
+		final Img< FloatType > imgf = ImagePlusToImgPlus.wrapFloat( imp );
 		print( imgf );
 
 		IJ.run( imp, "RGB Color", "" );
-		final Img< ARGBType > imgRGB = ImageJFunctions.wrapRGBA( imp );
+		final Img< ARGBType > imgRGB = ImagePlusToImgPlus.wrapRGBA( imp );
 		print( imgRGB );
 
 		// 2. Test ImagePlus -> Img, generic wrapper
 		IJ.run( imp, "8-bit", "" );
-		final Img< UnsignedByteType > g_imgb = ImageJFunctions.wrap( imp );
+		final Img< UnsignedByteType > g_imgb = ImagePlusToImgPlus.wrap( imp );
 		print( g_imgb );
 
 		IJ.run( imp, "16-bit", "" );
-		final Img< UnsignedShortType > g_imgs = ImageJFunctions.wrap( imp );
+		final Img< UnsignedShortType > g_imgs = ImagePlusToImgPlus.wrap( imp );
 		print( g_imgs );
 
 		IJ.run( imp, "32-bit", "" );
-		final Img< FloatType > g_imgf = ImageJFunctions.wrap( imp );
+		final Img< FloatType > g_imgf = ImagePlusToImgPlus.wrap( imp );
 		print( g_imgf );
 
 		IJ.run( imp, "RGB Color", "" );
-		final Img< ARGBType > g_imgRGB = ImageJFunctions.wrap( imp );
+		final Img< ARGBType > g_imgRGB = ImagePlusToImgPlus.wrap( imp );
 		print( g_imgRGB );
 
 		// 3. Test Img -> ImagePlus, specific wrappers

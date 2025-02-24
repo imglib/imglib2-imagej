@@ -32,7 +32,7 @@
  * #L%
  */
 
-package net.imglib2.imagej.imageplus;
+package net.imglib2.imagej;
 
 import static org.junit.Assert.assertEquals;
 
@@ -47,7 +47,7 @@ import ij.ImagePlus;
 import ij.gui.NewImage;
 import ij.measure.Calibration;
 
-public class ImagePlusAdapterTest< T extends NumericType< T > & NativeType< T > >
+public class ImgPlusToImagePlusTest< T extends NumericType< T > & NativeType< T > >
 {
 
 	/** Which dimensions to test. */
@@ -88,7 +88,7 @@ public class ImagePlusAdapterTest< T extends NumericType< T > & NativeType< T > 
 	private void testDimensionality( final int[] dim, final float[] calibration )
 	{
 		final ImagePlus imp = createCalibratedImagePlus( dim, calibration );
-		final ImgPlus< T > img = ImagePlusAdapter.wrapImgPlus( imp );
+		final ImgPlus< T > img = ImagePlusToImgPlus.wrapImgPlus( imp );
 		// Print stuff
 //		System.out.println( "got: " + img.getName() );
 //		for ( int d = 0; d < img.numDimensions(); d++ )

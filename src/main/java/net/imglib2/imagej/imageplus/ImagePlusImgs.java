@@ -34,6 +34,7 @@
 
 package net.imglib2.imagej.imageplus;
 
+import net.imglib2.imagej.ImagePlusToImgPlus;
 import net.imglib2.img.basictypeaccess.array.DoubleArray;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
@@ -206,6 +207,6 @@ final public class ImagePlusImgs
 	 */
 	final static public < T extends NumericType< T > & NativeType< T > > ImagePlusImg< T, ? > from( final ImagePlus imp )
 	{
-		return ImagePlusAdapter.< T >wrap( imp );
+		return ImagePlusToImgPlus.< T >wrap( imp );
 	}
 }

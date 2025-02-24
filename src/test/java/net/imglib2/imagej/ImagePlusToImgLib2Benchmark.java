@@ -36,7 +36,6 @@ package net.imglib2.imagej;
 import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.imagej.imageplus.ByteImagePlus;
-import net.imglib2.imagej.imageplus.ImagePlusAdapter;
 import net.imglib2.imagej.imageplus.VirtualStackAdapter;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.Views;
@@ -82,23 +81,23 @@ public class ImagePlusToImgLib2Benchmark
 	@Benchmark
 	public void wrapSmallOld()
 	{
-		ImagePlusAdapter.wrap( small );
+		ImagePlusToImgPlus.wrap( small );
 	}
 
 	@Benchmark
 	public void wrapDeepOld()
 	{
-		ImagePlusAdapter.wrap( deep );
+		ImagePlusToImgPlus.wrap( deep );
 	}
 
 	@Benchmark
 	public void wrapWideOld()
 	{
-		ImagePlusAdapter.wrap( wide );
+		ImagePlusToImgPlus.wrap( wide );
 	}
 
 	private final ImgPlus< UnsignedByteType > wrapped = VirtualStackAdapter.wrapByte( imageForIteration );
-	private final ByteImagePlus< UnsignedByteType > wrappedOld = ImagePlusAdapter.wrapByte( imageForIteration );
+	private final ByteImagePlus< UnsignedByteType > wrappedOld = ImagePlusToImgPlus.wrapByte( imageForIteration );
 
 	@Benchmark
 	public void iterateWrapped()
