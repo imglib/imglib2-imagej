@@ -34,8 +34,9 @@
 
 package net.imglib2.imagej.imageplus;
 
-import net.imglib2.imagej.ImageJFunctions;
+import ij.ImagePlus;
 import net.imglib2.imagej.ImagePlusToImgPlus;
+import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.test.RandomImgs;
@@ -45,10 +46,7 @@ import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-
 import org.junit.Test;
-
-import ij.ImagePlus;
 
 /**
  * Tests {@link VirtualStackAdapter}.
@@ -118,7 +116,7 @@ public class VirtualStackAdapterTest
 	private < T extends NativeType< T > & NumericType< T > > ImagePlus randomImagePlus( final int seed, final T type, final long... dimensions )
 	{
 		final Img< T > random = RandomImgs.seed(seed).nextImage( type, dimensions );
-		return ImageJFunctions.wrap( random, "test" );
+		return RAIToImagePlus.wrap( random, "test" );
 	}
 
 }

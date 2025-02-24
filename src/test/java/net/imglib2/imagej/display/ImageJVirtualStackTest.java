@@ -34,31 +34,22 @@
 
 package net.imglib2.imagej.display;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertTrue;
-
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.VirtualStack;
+import ij.process.*;
 import net.imglib2.RandomAccess;
-import net.imglib2.imagej.ImageJFunctions;
+import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.test.RandomImgs;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
-import ij.ImagePlus;
-import ij.ImageStack;
-import ij.VirtualStack;
-import ij.process.ByteProcessor;
-import ij.process.ColorProcessor;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
-import ij.process.ShortProcessor;
+import static org.junit.Assert.*;
 
 public class ImageJVirtualStackTest
 {
@@ -243,7 +234,7 @@ public class ImageJVirtualStackTest
 	public void testProcessorPerPlane()
 	{
 		final Img< UnsignedByteType > expected = RandomImgs.seed(54321).nextImage( new UnsignedByteType(), 100, 100, 100 );
-		final ImagePlus imagePlus = ImageJFunctions.wrap( expected, "title" );
+		final ImagePlus imagePlus = RAIToImagePlus.wrap( expected, "title" );
 		final ImageStack stack = imagePlus.getStack();
 		final ImageProcessor p1 = stack.getProcessor( 1 );
 		final ImageProcessor p2 = stack.getProcessor( 2 );

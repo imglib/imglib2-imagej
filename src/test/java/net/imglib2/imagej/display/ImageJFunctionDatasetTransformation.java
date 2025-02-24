@@ -40,7 +40,7 @@ package net.imglib2.imagej.display;
 
 import ij.ImagePlus;
 import net.imglib2.Cursor;
-import net.imglib2.imagej.ImageJFunctions;
+import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.img.cell.CellImgFactory;
@@ -74,7 +74,7 @@ public class ImageJFunctionDatasetTransformation
 			cursor.get().set( new BitType( true ) );
 		}
 
-		ImagePlus imp = ImageJFunctions.wrap( img1, "" );
+		ImagePlus imp = RAIToImagePlus.wrap( img1, "" );
 
 		Assert.assertEquals( ImagePlus.GRAY8, imp.getType() );
 		Assert.assertEquals( 255, imp.getStatistics().min, 0 );

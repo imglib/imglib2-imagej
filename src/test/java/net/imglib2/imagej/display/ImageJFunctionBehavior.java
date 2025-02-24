@@ -34,16 +34,15 @@
 
 package net.imglib2.imagej.display;
 
-import net.imglib2.imagej.ImageJFunctions;
+import ij.IJ;
+import ij.ImagePlus;
 import net.imglib2.imagej.ImagePlusToImgPlus;
+import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-
-import ij.IJ;
-import ij.ImagePlus;
 
 /**
  * TODO
@@ -52,12 +51,12 @@ import ij.ImagePlus;
 public class ImageJFunctionBehavior
 {
 
-	static private final void print( final Img< ? > img )
+	static private void print(final Img<?> img)
 	{
 		System.out.println( "img: " + img );
 	}
 
-	static private final void print( final ImagePlus imp )
+	static private void print(final ImagePlus imp)
 	{
 		System.out.println( "imp: " + imp );
 	}
@@ -103,29 +102,29 @@ public class ImageJFunctionBehavior
 		print( g_imgRGB );
 
 		// 3. Test Img -> ImagePlus, specific wrappers
-		final ImagePlus impb = ImageJFunctions.wrapUnsignedByte( imgb, "byte Img" );
+		final ImagePlus impb = RAIToImagePlus.wrapUnsignedByte( imgb, "byte Img" );
 		print( impb );
 
-		final ImagePlus imps = ImageJFunctions.wrapUnsignedShort( imgs, "short Img" );
+		final ImagePlus imps = RAIToImagePlus.wrapUnsignedShort( imgs, "short Img" );
 		print( imps );
 
-		final ImagePlus impf = ImageJFunctions.wrapFloat( imgf, "float Img" );
+		final ImagePlus impf = RAIToImagePlus.wrapFloat( imgf, "float Img" );
 		print( impf );
 
-		final ImagePlus impRGB = ImageJFunctions.wrapRGB( imgRGB, "RGB Img" );
+		final ImagePlus impRGB = RAIToImagePlus.wrapRGB( imgRGB, "RGB Img" );
 		print( impRGB );
 
 		// 4. Test Img -> ImagePlus, generic wrappers
-		final ImagePlus g_impb = ImageJFunctions.wrap( imgb, "byte Img" );
+		final ImagePlus g_impb = RAIToImagePlus.wrap( imgb, "byte Img" );
 		print( g_impb );
 
-		final ImagePlus g_imps = ImageJFunctions.wrap( imgs, "short Img" );
+		final ImagePlus g_imps = RAIToImagePlus.wrap( imgs, "short Img" );
 		print( g_imps );
 
-		final ImagePlus g_impf = ImageJFunctions.wrap( imgf, "float Img" );
+		final ImagePlus g_impf = RAIToImagePlus.wrap( imgf, "float Img" );
 		print( g_impf );
 
-		final ImagePlus g_impRGB = ImageJFunctions.wrap( imgRGB, "RGB Img" );
+		final ImagePlus g_impRGB = RAIToImagePlus.wrap( imgRGB, "RGB Img" );
 		print( g_impRGB );
 	}
 }
