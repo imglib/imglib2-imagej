@@ -49,11 +49,11 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
 /**
- * Tests {@link VirtualStackAdapter}.
+ * Tests {@link ImagePlusToImgPlus}.
  *
  * @author Matthias Arzt
  */
-public class VirtualStackAdapterTest
+public class ImagePlusToImgPlusTest
 {
 
 	private static final long[] DIMENSIONS = { 2, 3, 4, 5, 6 };
@@ -63,8 +63,8 @@ public class VirtualStackAdapterTest
 	public void testUnsignedByte()
 	{
 		final ImagePlus image = randomImagePlus( 123, new UnsignedByteType(), DIMENSIONS );
-		final Img< UnsignedByteType > actual = VirtualStackAdapter.wrapByte( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( image );
+		final Img< UnsignedByteType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -72,8 +72,8 @@ public class VirtualStackAdapterTest
 	public void testUnsignedShort()
 	{
 		final ImagePlus image = randomImagePlus( 234, new UnsignedShortType(), DIMENSIONS );
-		final Img< UnsignedShortType > actual = VirtualStackAdapter.wrapShort( image );
-		final Img< UnsignedShortType > expected = ImagePlusToImgPlus.wrapShort( image );
+		final Img< UnsignedShortType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapShortLazily( image );
+		final Img< UnsignedShortType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapShort( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -81,8 +81,8 @@ public class VirtualStackAdapterTest
 	public void testRGB()
 	{
 		final ImagePlus image = randomImagePlus( 345, new ARGBType(), DIMENSIONS );
-		final Img< ARGBType > actual = VirtualStackAdapter.wrapRGBA( image );
-		final Img< ARGBType > expected = ImagePlusToImgPlus.wrapRGBA( image );
+		final Img< ARGBType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapRGBALazily( image );
+		final Img< ARGBType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapRGBA( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -90,8 +90,8 @@ public class VirtualStackAdapterTest
 	public void testFloat()
 	{
 		final ImagePlus image = randomImagePlus( 456, new FloatType(), DIMENSIONS );
-		final Img< FloatType > actual = VirtualStackAdapter.wrapFloat( image );
-		final Img< FloatType > expected = ImagePlusToImgPlus.wrapFloat( image );
+		final Img< FloatType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapFloatLazily( image );
+		final Img< FloatType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapFloat( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -99,8 +99,8 @@ public class VirtualStackAdapterTest
 	public void testLowerNumDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 567, new UnsignedByteType(), 2, 3, 6 );
-		final Img< UnsignedByteType > actual = VirtualStackAdapter.wrapByte( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( image );
+		final Img< UnsignedByteType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -108,8 +108,8 @@ public class VirtualStackAdapterTest
 	public void testSingletonDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 678, new UnsignedByteType(), 2, 1, 1, 6 );
-		final Img< UnsignedByteType > actual = VirtualStackAdapter.wrapByte( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( image );
+		final Img< UnsignedByteType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 

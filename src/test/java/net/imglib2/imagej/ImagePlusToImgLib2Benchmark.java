@@ -36,7 +36,6 @@ package net.imglib2.imagej;
 import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.imagej.imageplus.ByteImagePlus;
-import net.imglib2.imagej.imageplus.VirtualStackAdapter;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.view.Views;
 
@@ -63,41 +62,41 @@ public class ImagePlusToImgLib2Benchmark
 	@Benchmark
 	public void wrapSmall()
 	{
-		VirtualStackAdapter.wrap( small );
+		net.imglib2.imagej.ImagePlusToImgPlus.wrapLazily( small );
 	}
 
 	@Benchmark
 	public void wrapDeep()
 	{
-		VirtualStackAdapter.wrap( deep );
+		net.imglib2.imagej.ImagePlusToImgPlus.wrapLazily( deep );
 	}
 
 	@Benchmark
 	public void wrapWide()
 	{
-		VirtualStackAdapter.wrap( wide );
+		ImagePlusToImgPlus.wrapLazily( wide );
 	}
 
 	@Benchmark
 	public void wrapSmallOld()
 	{
-		ImagePlusToImgPlus.wrap( small );
+		net.imglib2.imagej.ImagePlusToImgPlus.wrap( small );
 	}
 
 	@Benchmark
 	public void wrapDeepOld()
 	{
-		ImagePlusToImgPlus.wrap( deep );
+		net.imglib2.imagej.ImagePlusToImgPlus.wrap( deep );
 	}
 
 	@Benchmark
 	public void wrapWideOld()
 	{
-		ImagePlusToImgPlus.wrap( wide );
+		net.imglib2.imagej.ImagePlusToImgPlus.wrap( wide );
 	}
 
-	private final ImgPlus< UnsignedByteType > wrapped = VirtualStackAdapter.wrapByte( imageForIteration );
-	private final ByteImagePlus< UnsignedByteType > wrappedOld = ImagePlusToImgPlus.wrapByte( imageForIteration );
+	private final ImgPlus< UnsignedByteType > wrapped = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( imageForIteration );
+	private final ByteImagePlus< UnsignedByteType > wrappedOld = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( imageForIteration );
 
 	@Benchmark
 	public void iterateWrapped()
