@@ -56,7 +56,7 @@ import net.imglib2.view.Views;
 /**
  * Abstract class to simplify the implementation of an {@link VirtualStack}.
  * <p>
- * This class is intended to be used in {@link ImageJVirtualStack} and {@link PlanarImgToVirtualStack}.
+ * This class is intended to be used in {@link ImageJVirtualStack} and {@link PlanarImgToImagePlus}.
  *
  * @author Matthias Arzt
  */

@@ -34,151 +34,271 @@
 
 package net.imglib2.imagej;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.NumericType;
+import net.imagej.axis.AxisType;
+import net.imglib2.FinalInterval;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgView;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.ByteType;
+import net.imglib2.type.numeric.integer.IntType;
+import net.imglib2.type.numeric.integer.LongType;
+import net.imglib2.type.numeric.integer.ShortType;
+import net.imglib2.type.numeric.integer.Unsigned128BitType;
+import net.imglib2.type.numeric.integer.Unsigned12BitType;
+import net.imglib2.type.numeric.integer.Unsigned2BitType;
+import net.imglib2.type.numeric.integer.Unsigned4BitType;
+import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
+import net.imglib2.type.numeric.integer.UnsignedLongType;
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.ConstantUtils;
+import net.imglib2.view.Views;
 
+import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import ij.ImagePlus;
-import ij.gui.NewImage;
-import ij.measure.Calibration;
+import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
-public class ImgPlusToImagePlusTest< T extends NumericType< T > & NativeType< T > >
+public class ImgPlusToImagePlusTest
 {
-
-	/** Which dimensions to test. */
-	final int[][] dim = new int[][] {
-			//  nX		nY		nC		nZ		nT
-			{ 	128, 	128, 	1,		1, 		1  },   		// 2D
-			{ 	128, 	128, 	1, 		10, 	1  },   		// 3D
-			{ 	128, 	128, 	5, 		10, 	1  },   		// 3D over 5 channels
-			{ 	128, 	128, 	1,		10, 	30 }, 			// 4D
-			{ 	128, 	128, 	5,		10, 	30 }, 			// 4D over 5 channels
-			{ 	128, 	128, 	1,		1, 		30 }, 			// 2D + T
-			{ 	128, 	128, 	5,		1, 		30 } 			// 2D + T over 5 channels
-
-	};
-
-	/** Corresponding calibrations. */
-	final float[][] calibration = new float[][] {
-			//	X		Y		C (ignored)		Z			T
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 },
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 },
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 },
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 },
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 },
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 },
-			{	0.2f,	0.2f,	Float.NaN,		1.5f,		2 }
-
-	};
-
-	final String[] units = new String[] { "um", "mm", "cm", "minutes" };
+	@Test
+	public void testAxisOrder()
+	{
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 1, 1, 2, 3, 4 );
+		fill( img );
+		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
+		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
+		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
+	}
 
 	@Test
-	public void testDimensionality()
+	public void test1DStack()
 	{
-		for ( int i = 0; i < dim.length; i++ )
-			testDimensionality( dim[ i ], calibration[ i ] );
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 2, 2 );
+		fill( img );
+		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.TIME, Axes.X } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		assertArrayEquals( new byte[] { 1, 3 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 1 ) ) );
+		assertArrayEquals( new byte[] { 2, 4 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 2 ) ) );
 	}
 
-	private void testDimensionality( final int[] dim, final float[] calibration )
+	@Test
+	public void testNoXY()
 	{
-		final ImagePlus imp = createCalibratedImagePlus( dim, calibration );
-		final ImgPlus< T > img = ImagePlusToImgPlus.wrapImgPlus( imp );
-		// Print stuff
-//		System.out.println( "got: " + img.getName() );
-//		for ( int d = 0; d < img.numDimensions(); d++ )
-//		{
-//			System.out.println( "    Axis " + d + "\t - " + img.axis( d ) + ", spacing = " + img.calibration( d ) + ", dimension = " + img.dimension( d ) );
-//		}
-		assertEquals( getExpectedNumDimensions( dim ), img.numDimensions() );
-		checkDimensionality( dim, img );
-		checkCalibration( dim, calibration, img );
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 2, 2 );
+		fill( img );
+		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.TIME, Axes.CHANNEL } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		assertArrayEquals( new byte[] { 2 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 2 ) ) );
+		assertArrayEquals( new byte[] { 3 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 2, 1, 1 ) ) );
 	}
 
-	private ImagePlus createCalibratedImagePlus( final int[] dim, final float[] calibration )
+	@Ignore( "not supporting more than five dimensions yet" )
+	@Test
+	public void test6d()
 	{
-		// Create ImagePlus
-		final int slices = dim[ 2 ] * dim[ 3 ] * dim[ 4 ];
-		final ImagePlus imp = NewImage.createByteImage( "Test", dim[ 0 ], dim[ 1 ], slices, NewImage.FILL_BLACK );
-		imp.setDimensions( dim[ 2 ], dim[ 3 ], dim[ 4 ] );
-
-		// Set calibration
-		final Calibration impCal = imp.getCalibration();
-		impCal.pixelWidth = calibration[ 0 ];
-		impCal.pixelHeight = calibration[ 1 ];
-		// 2 is for channels
-		impCal.pixelDepth = calibration[ 3 ];
-		impCal.frameInterval = calibration[ 4 ];
-		impCal.setXUnit( units[ 0 ] );
-		impCal.setYUnit( units[ 1 ] );
-		impCal.setZUnit( units[ 2 ] );
-		impCal.setTimeUnit( units[ 3 ] );
-
-		// Print stuff
-//		System.out.println( "\nFor ImagePlus " + imp + " with " + imp.getCalibration() );
-		return imp;
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 2, 2, 2, 2, 2, 2 );
+		fill( img );
+		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL, Axes.TIME, Axes.CHANNEL } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, true );
+		assertArrayEquals( new byte[] { 2 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 2 ) ) );
+		assertArrayEquals( new byte[] { 3 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 2, 1, 1 ) ) );
 	}
 
-	private int getExpectedNumDimensions( final int[] dim )
+	@Test
+	public void testColoredAxisOrder()
 	{
-		// Are num dimension correct?
-		int expectedNumDimensions = 0;
-		for ( int d = 0; d < dim.length; d++ )
-		{
-			if ( dim[ d ] > 1 )
-				expectedNumDimensions++;
-		}
-		return expectedNumDimensions;
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 1, 1, 2, 3, 4 );
+		fill( img );
+		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, true );
+		assertEquals( 0xff020406, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
+		assertEquals( 0xff07090b, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
 	}
 
-	private void checkDimensionality( final int[] dim, final ImgPlus< T > img )
+	@Test
+	public void testBitType()
 	{
-		int skipDim = 0;
-		for ( int d = 0; d < dim.length; d++ )
-		{
-			if ( dim[ d ] > 1 )
-			{
-				// imglib skips singleton dimensions, so we must test only
-				// against non-singleton dimension
-				assertEquals(
-						String.format( "For dimension %d,  expected %d, but got %d.", d, dim[ d ], img.dimension( skipDim ) ),
-						dim[ d ], img.dimension( skipDim ) );
-				skipDim++;
-			}
-		}
+		testTypeConversion( ByteProcessor.class, 1, new BitType( true ) );
 	}
 
-	private void checkCalibration( final int[] dim, final float[] calibration, final ImgPlus< T > img )
+	@Test
+	public void testBoolType()
 	{
-		int skipDim = 0;
-		for ( int d = 0; d < calibration.length; d++ )
-		{
-			if ( dim[ d ] > 1 )
-			{
-				// Is it the channel axis?
-				if ( d < getExpectedNumDimensions( dim ) && img.axis( d ).type() == Axes.CHANNEL )
-				{
+		testTypeConversion( ByteProcessor.class, 1, new BoolType( true ) );
+	}
 
-					// Then the calibration should be 1,
-					assertEquals( 1f, img.averageScale( skipDim ),
-							Float.MIN_VALUE );
+	@Test
+	public void testUnsigned2BitType()
+	{
+		testTypeConversion( ByteProcessor.class, 3, new Unsigned2BitType( 3 ) );
+	}
 
-				}
-				else
-				{
+	@Test
+	public void testUnsigned4BitTypeType()
+	{
+		testTypeConversion( ByteProcessor.class, 15, new Unsigned4BitType( 15 ) );
+	}
 
-					// otherwise it should be what we set.
-					assertEquals( calibration[ d ], img.averageScale( skipDim ),
-							Float.MIN_VALUE );
-				}
-				skipDim++;
+	@Test
+	public void testUnsignedByteType()
+	{
+		testTypeConversion( ByteProcessor.class, 42f, new UnsignedByteType( 42 ) );
+	}
 
-			}
-		}
+	@Test
+	public void testUnsigned12BitType()
+	{
+		testTypeConversion( ShortProcessor.class, 420, new Unsigned12BitType( 420 ) );
+	}
+
+	@Test
+	public void testUnsignedShortType()
+	{
+		testTypeConversion( ShortProcessor.class, 42f, new UnsignedShortType( 42 ) );
+	}
+
+	@Test
+	public void testUnsignedIntType()
+	{
+		testTypeConversion( FloatProcessor.class, 42, new UnsignedIntType( 42 ) );
+	}
+
+	@Test
+	public void testUnsignedLongType()
+	{
+		testTypeConversion( FloatProcessor.class, 42, new UnsignedLongType( 42 ) );
+	}
+
+	@Test
+	public void testUnsigned128BitType()
+	{
+		testTypeConversion( FloatProcessor.class, 1000000, new Unsigned128BitType( 1000000, 0 ) );
+	}
+
+	@Test
+	public void testByteType()
+	{
+		testTypeConversion( FloatProcessor.class, -42, new ByteType( ( byte ) -42 ) );
+	}
+
+	@Test
+	public void testShortType()
+	{
+		testTypeConversion( FloatProcessor.class, -42, new ShortType( ( short ) -42 ) );
+	}
+
+	@Test
+	public void testIntType()
+	{
+		testTypeConversion( FloatProcessor.class, -42, new IntType( -42 ) );
+	}
+
+	@Test
+	public void testLongType()
+	{
+		testTypeConversion( FloatProcessor.class, -42, new LongType( -42 ) );
+	}
+
+	@Test
+	public void testFloatType()
+	{
+		testTypeConversion( FloatProcessor.class, -42f, new FloatType( -42 ) );
+	}
+
+	@Test
+	public void testDoubleType()
+	{
+		testTypeConversion( FloatProcessor.class, -42f, new DoubleType( -42 ) );
+	}
+
+	private < T extends RealType< T > > void testTypeConversion( final Class< ? extends ImageProcessor > processorClass, final float expected, final T input )
+	{
+		final RandomAccessibleInterval< T > rai = ConstantUtils.constantRandomAccessibleInterval( input, 2, new FinalInterval( 1, 1 ) );
+		final Img< T > image = ImgView.wrap( rai, null );
+		final ImgPlus< T > imgPlus = new ImgPlus< T >( image, "title", new AxisType[] { Axes.X, Axes.Y } );
+		// process
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		// test
+		final ImageProcessor processor = imagePlus.getProcessor();
+		Assert.assertTrue( processorClass.isInstance( processor ) );
+		Assert.assertEquals( expected, processor.getPixelValue( 0, 0 ), 0f );
+	}
+
+	private void fill( final RandomAccessibleInterval< ? extends IntegerType > img )
+	{
+		final AtomicInteger i = new AtomicInteger();
+		Views.flatIterable( img ).forEach( pixel -> pixel.setInteger( i.incrementAndGet() ) );
+	}
+
+	@Test
+	public void testUnknownAxes()
+	{
+		final byte[] array = { 1, 2, 3, 4, 5, 6 };
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( array, 1, 1, 2, 3 );
+		final AxisType[] axes = { Axes.unknown(), Axes.unknown(), Axes.TIME, Axes.unknown() };
+		final ImagePlus result = ImgPlusToImagePlus.wrap( new ImgPlus<>( img, "title", axes ), false );
+		assertEquals( 3, result.getNChannels() );
+		assertEquals( 2, result.getNFrames() );
+	}
+
+	@Test
+	public void testPersistence()
+	{
+		// setup
+		final Img< FloatType > img = ArrayImgs.floats( 1, 1 );
+		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		final float expected = 42;
+		// process
+		final ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
+		processor.setf( 0, 0, expected );
+		imagePlus.getStack().setPixels( processor.getPixels(), 1 ); // NB:
+																	// required
+																	// to signal
+																	// data
+																	// changed
+		// test
+		assertEquals( expected, img.cursor().next().get(), 0.0f );
+	}
+
+	@Test
+	public void testPersistenceBits()
+	{
+		// setup
+		final Img< BitType > img = ArrayImgs.bits( 1, 1 );
+		final ImgPlus< BitType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y } );
+		final ImagePlus imagePlus = ImgPlusToImagePlus.wrapAndScaleBitType( imgPlus );
+		// process
+		final ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
+		processor.setf( 0, 0, 255 );
+		imagePlus.getStack().setPixels( processor.getPixels(), 1 ); // NB:
+																	// required
+																	// to signal
+																	// data
+																	// changed
+		// test
+		assertEquals( true, img.cursor().next().get() );
 	}
 }

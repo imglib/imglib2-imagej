@@ -35,6 +35,7 @@ package net.imglib2.imagej.display;
 
 import ij.ImageStack;
 import net.imagej.ImgPlus;
+import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.NativeType;
@@ -106,7 +107,7 @@ public class ImageJVirtualStackGetProcessorBenchmark
 	private < T extends NativeType< T > > void test( T type )
 	{
 		Img< T > image = getImage( type );
-		ImageStack stack = ImgToVirtualStack.wrap( new ImgPlus<>( image ) ).getStack();
+		ImageStack stack = ImgPlusToImagePlus.wrap( new ImgPlus<>( image ) ).getStack();
 		for ( int i = 0; i < stack.getSize(); i++ )
 		{
 			stack.getProcessor( i + 1 );

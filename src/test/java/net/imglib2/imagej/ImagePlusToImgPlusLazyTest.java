@@ -32,11 +32,9 @@
  * #L%
  */
 
-package net.imglib2.imagej.imageplus;
+package net.imglib2.imagej;
 
 import ij.ImagePlus;
-import net.imglib2.imagej.ImagePlusToImgPlus;
-import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.test.ImgLib2Assert;
 import net.imglib2.test.RandomImgs;
@@ -49,11 +47,11 @@ import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
 /**
- * Tests {@link ImagePlusToImgPlus}.
+ * Tests the lazy wrapping functions of {@link ImagePlusToImgPlus}.
  *
  * @author Matthias Arzt
  */
-public class ImagePlusToImgPlusTest
+public class ImagePlusToImgPlusLazyTest
 {
 
 	private static final long[] DIMENSIONS = { 2, 3, 4, 5, 6 };
@@ -63,8 +61,8 @@ public class ImagePlusToImgPlusTest
 	public void testUnsignedByte()
 	{
 		final ImagePlus image = randomImagePlus( 123, new UnsignedByteType(), DIMENSIONS );
-		final Img< UnsignedByteType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( image );
-		final Img< UnsignedByteType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByteLazily( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -72,8 +70,8 @@ public class ImagePlusToImgPlusTest
 	public void testUnsignedShort()
 	{
 		final ImagePlus image = randomImagePlus( 234, new UnsignedShortType(), DIMENSIONS );
-		final Img< UnsignedShortType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapShortLazily( image );
-		final Img< UnsignedShortType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapShort( image );
+		final Img< UnsignedShortType > actual = ImagePlusToImgPlus.wrapShortLazily( image );
+		final Img< UnsignedShortType > expected = ImagePlusToImgPlus.wrapShort( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -81,8 +79,8 @@ public class ImagePlusToImgPlusTest
 	public void testRGB()
 	{
 		final ImagePlus image = randomImagePlus( 345, new ARGBType(), DIMENSIONS );
-		final Img< ARGBType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapRGBALazily( image );
-		final Img< ARGBType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapRGBA( image );
+		final Img< ARGBType > actual = ImagePlusToImgPlus.wrapRGBALazily( image );
+		final Img< ARGBType > expected = ImagePlusToImgPlus.wrapRGBA( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -90,8 +88,8 @@ public class ImagePlusToImgPlusTest
 	public void testFloat()
 	{
 		final ImagePlus image = randomImagePlus( 456, new FloatType(), DIMENSIONS );
-		final Img< FloatType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapFloatLazily( image );
-		final Img< FloatType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapFloat( image );
+		final Img< FloatType > actual = ImagePlusToImgPlus.wrapFloatLazily( image );
+		final Img< FloatType > expected = ImagePlusToImgPlus.wrapFloat( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -99,8 +97,8 @@ public class ImagePlusToImgPlusTest
 	public void testLowerNumDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 567, new UnsignedByteType(), 2, 3, 6 );
-		final Img< UnsignedByteType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( image );
-		final Img< UnsignedByteType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByteLazily( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -108,8 +106,8 @@ public class ImagePlusToImgPlusTest
 	public void testSingletonDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 678, new UnsignedByteType(), 2, 1, 1, 6 );
-		final Img< UnsignedByteType > actual = net.imglib2.imagej.ImagePlusToImgPlus.wrapByteLazily( image );
-		final Img< UnsignedByteType > expected = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByteLazily( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 

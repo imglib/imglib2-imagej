@@ -55,9 +55,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
- * Tests {@link CellImgToVirtualStack}.
+ * Tests {@link CellImgToImagePlus}.
  */
-public class CellImgToVirtualStackTest
+public class CellImgToImagePlusTest
 {
 
 	@Test
@@ -71,7 +71,7 @@ public class CellImgToVirtualStackTest
 
 	private ImageStack wrap( Img< ? > image )
 	{
-		return CellImgToVirtualStack.wrap( ImgPlus.wrap( image ) ).getStack();
+		return CellImgToImagePlus.wrap( ImgPlus.wrap( image ) ).getStack();
 	}
 
 	@Test
@@ -98,7 +98,7 @@ public class CellImgToVirtualStackTest
 		final Img< UnsignedByteType > img = new CellImgFactory<>( new UnsignedByteType(), 1, 1, 1, 1, 1).create( new long[] { 1, 1, 2, 3, 4 } );
 		fill( img );
 		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
-		final ImagePlus imagePlus = CellImgToVirtualStack.wrap( imgPlus );
+		final ImagePlus imagePlus = CellImgToImagePlus.wrap( imgPlus );
 		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
 		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
 		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
@@ -107,39 +107,39 @@ public class CellImgToVirtualStackTest
 	@Test
 	public void testIsSupported()
 	{
-		assertTrue( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new UnsignedByteType(), 2, 2 ).create( 2, 2 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new UnsignedByteType(), 2, 2 ).create( 2, 2 ) ) ) );
 	}
 
 	@Test
 	public void testIsSupported_FloatType()
 	{
-		assertTrue( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2 ).create( 2, 2 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2 ).create( 2, 2 ) ) ) );
 	}
 
 	@Test
 	public void testIsSupported_UnsupportedType()
 	{
-		assertFalse( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new DoubleType(), 2, 2 ).create( 2, 2 ) ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new DoubleType(), 2, 2 ).create( 2, 2 ) ) ) );
 	}
 
 	@Test
 	public void testIsSupported_PlanarCells()
 	{
-		assertTrue( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 7, 2 ).create( 2, 2 ) ) ) );
-		assertTrue( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 1 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 7, 2 ).create( 2, 2 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 1 ) ) ) );
 	}
 
 	@Test
 	public void testIsSupported_NoPlanarCells() {
-		assertFalse( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 1, 2 ).create( 2, 2 ) ) ) );
-		assertFalse( CellImgToVirtualStack.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 3 ) ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 1, 2 ).create( 2, 2 ) ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 3 ) ) ) );
 	}
 
 	@Test
 	public void testIsSupported_WrongAxis() {
 		final Img< FloatType > cellImg = new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 1 );
-		assertTrue( CellImgToVirtualStack.isSupported( new ImgPlus<>( cellImg, "title", new AxisType[]{ Axes.X, Axes.Y, Axes.unknown() } ) ) );
-		assertFalse( CellImgToVirtualStack.isSupported( new ImgPlus<>( cellImg, "title", new AxisType[]{ Axes.X, Axes.Z, Axes.TIME } ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( new ImgPlus<>( cellImg, "title", new AxisType[]{ Axes.X, Axes.Y, Axes.unknown() } ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( new ImgPlus<>( cellImg, "title", new AxisType[]{ Axes.X, Axes.Z, Axes.TIME } ) ) );
 	}
 
 	private void fill( RandomAccessibleInterval< ? extends IntegerType< ? > > image )
@@ -154,7 +154,7 @@ public class CellImgToVirtualStackTest
 	{
 		// setup
 		final Img< FloatType > img = new CellImgFactory<>( new FloatType() ).create( 1, 1, 1 );
-		final ImagePlus imagePlus = CellImgToVirtualStack.wrap( ImgPlus.wrap( img ) );
+		final ImagePlus imagePlus = CellImgToImagePlus.wrap( ImgPlus.wrap( img ) );
 		final float expected = 42.0f;
 		// process
 		imagePlus.getProcessor().setf( 0, 0, expected );
@@ -166,7 +166,7 @@ public class CellImgToVirtualStackTest
 	public void testSetPixels() {
 		// setup
 		final Img< FloatType > img = new CellImgFactory<>( new FloatType() ).create( 1, 1, 1 );
-		final ImagePlus imagePlus = CellImgToVirtualStack.wrap( new ImgPlus<>( img, "title" ) );
+		final ImagePlus imagePlus = CellImgToImagePlus.wrap( new ImgPlus<>( img, "title" ) );
 		final float expected = 42.0f;
 		// process
 		imagePlus.getStack().setPixels( new float[] { expected }, 1 );

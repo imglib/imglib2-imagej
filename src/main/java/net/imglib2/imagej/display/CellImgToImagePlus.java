@@ -40,6 +40,7 @@ import net.imglib2.Dimensions;
 import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
+import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
@@ -61,11 +62,11 @@ import java.util.List;
  * cells contains exactly one image plane), and certain pixel types:
  * UnsignedByteType, UnsignedShortType, ARGBType and FloatType.
  *
- * @see ImgToVirtualStack
- * @see PlanarImgToVirtualStack
- * @see ArrayImgToVirtualStack
+ * @see ImgPlusToImagePlus
+ * @see PlanarImgToImagePlus
+ * @see ArrayImgToImagePlus
  */
-public class CellImgToVirtualStack
+public class CellImgToImagePlus
 {
 
 	/**
@@ -74,7 +75,7 @@ public class CellImgToVirtualStack
 	public static boolean isSupported( ImgPlus< ? > imgPlus )
 	{
 		return isCellImgWithPlanarCells( imgPlus.getImg() ) &&
-				PlanarImgToVirtualStack.isSupported( toPlanarImgPlus( imgPlus ) );
+				PlanarImgToImagePlus.isSupported( toPlanarImgPlus( imgPlus ) );
 	}
 
 	private static boolean isCellImgWithPlanarCells( Img< ? > imgPlus )
@@ -102,7 +103,7 @@ public class CellImgToVirtualStack
 	 */
 	public static ImagePlus wrap( ImgPlus< ? > imgPlus )
 	{
-		return PlanarImgToVirtualStack.wrap( toPlanarImgPlus( imgPlus ) );
+		return PlanarImgToImagePlus.wrap( toPlanarImgPlus( imgPlus ) );
 	}
 
 	private static < T > ImgPlus< T > toPlanarImgPlus( ImgPlus< T > image )

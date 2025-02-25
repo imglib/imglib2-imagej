@@ -62,13 +62,13 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.VirtualStack;
 
-public class PlanarImgToVirtualStackTest
+public class PlanarImgToImagePlusTest
 {
 	@Test
 	public void testStorageArray()
 	{
 		final PlanarImg< UnsignedByteType, ? > img = example();
-		final VirtualStack stack = PlanarImgToVirtualStack.wrap( img );
+		final VirtualStack stack = PlanarImgToImagePlus.wrap( img );
 		assertSame( img.getPlane( 1 ).getCurrentStorageArray(), stack.getPixels( 2 ) );
 	}
 
@@ -76,7 +76,7 @@ public class PlanarImgToVirtualStackTest
 	public void testPixelValues()
 	{
 		final PlanarImg< UnsignedByteType, ? > img = example();
-		final VirtualStack stack = PlanarImgToVirtualStack.wrap( img );
+		final VirtualStack stack = PlanarImgToImagePlus.wrap( img );
 		assertArrayEquals( new byte[] { 1, 2, 3 }, ( byte[] ) stack.getPixels( 1 ) );
 		assertArrayEquals( new byte[] { 4, 5, 6 }, ( byte[] ) stack.getPixels( 2 ) );
 	}
@@ -89,7 +89,7 @@ public class PlanarImgToVirtualStackTest
 		final String title = "test image";
 		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, title, new AxisType[] { Axes.X, Axes.Y, Axes.TIME } );
 		// process
-		final ImagePlus imagePlus = PlanarImgToVirtualStack.wrap( imgPlus );
+		final ImagePlus imagePlus = PlanarImgToImagePlus.wrap( imgPlus );
 		// test
 		assertEquals( title, imagePlus.getTitle() );
 		assertEquals( 3, imagePlus.getWidth() );
@@ -105,7 +105,7 @@ public class PlanarImgToVirtualStackTest
 		final PlanarImg< UnsignedByteType, ? > img = new PlanarImgFactory< UnsignedByteType >().create( new long[] { 1, 1, 2, 3, 4 }, new UnsignedByteType() );
 		fill( img );
 		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
-		final ImagePlus imagePlus = PlanarImgToVirtualStack.wrap( imgPlus );
+		final ImagePlus imagePlus = PlanarImgToImagePlus.wrap( imgPlus );
 		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
 		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
 		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
@@ -130,7 +130,7 @@ public class PlanarImgToVirtualStackTest
 		// setup
 		final PlanarImg< FloatType, FloatArray > img = PlanarImgs.floats( 1, 1 );
 		final ImgPlus< FloatType > imgPlus = new ImgPlus< FloatType >( img, "title", new AxisType[] { Axes.X, Axes.Y } );
-		final ImagePlus imagePlus = PlanarImgToVirtualStack.wrap( imgPlus );
+		final ImagePlus imagePlus = PlanarImgToImagePlus.wrap( imgPlus );
 		final float expected = 42.0f;
 		// process
 		imagePlus.getProcessor().setf( 0, 0, expected );
@@ -142,7 +142,7 @@ public class PlanarImgToVirtualStackTest
 	public void testSetPixels() {
 		// setup
 		final PlanarImg< FloatType, FloatArray > img = PlanarImgs.floats( 1, 1 );
-		final ImagePlus imagePlus = PlanarImgToVirtualStack.wrap( new ImgPlus<>( img, "title" ) );
+		final ImagePlus imagePlus = PlanarImgToImagePlus.wrap( new ImgPlus<>( img, "title" ) );
 		final float expected = 42.0f;
 		// process
 		imagePlus.getStack().setPixels( new float[] { expected }, 1 );
@@ -156,7 +156,7 @@ public class PlanarImgToVirtualStackTest
 		// To achieve this min and max must not be set for ColorProcessor.
 		final PlanarImg< ARGBType, IntArray > argbs = PlanarImgs.argbs( 1, 1, 1 );
 		argbs.randomAccess().get().set( 0xff010203 );
-		final VirtualStack stack = PlanarImgToVirtualStack.wrap( argbs );
+		final VirtualStack stack = PlanarImgToImagePlus.wrap( argbs );
 		assertArrayEquals( new int[] { 0xff010203 }, (int[]) stack.getPixels( 1 ) );
 		stack.getProcessor( 1 );
 		assertArrayEquals( new int[] { 0xff010203 }, (int[]) stack.getPixels( 1 ) );
@@ -166,7 +166,7 @@ public class PlanarImgToVirtualStackTest
 	public void testConvertingBackAndForth() {
 		ImagePlus imagePlus = IJ.createImage( "test", "8-bit ramp", 3, 3, 3 );
 		ImgPlus< UnsignedByteType > convertedImg = ImagePlusToImgPlus.wrapByteLazily( imagePlus );
-		ImagePlus twiceConvertedImagePlus = PlanarImgToVirtualStack.wrap( convertedImg );
+		ImagePlus twiceConvertedImagePlus = PlanarImgToImagePlus.wrap( convertedImg );
 		twiceConvertedImagePlus.getStack().getProcessor( 1 ).set( 0, 0, 5 );
 		assertEquals( 5, imagePlus.getStack().getProcessor( 1 ).get( 0, 0 ) );
 	}

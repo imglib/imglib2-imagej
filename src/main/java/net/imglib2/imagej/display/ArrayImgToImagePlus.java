@@ -42,6 +42,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imagej.axis.CalibratedAxis;
+import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
@@ -54,9 +55,9 @@ import net.imglib2.type.numeric.real.FloatType;
 import ij.ImagePlus;
 import ij.process.ImageProcessor;
 
-public class ArrayImgToVirtualStack
+public class ArrayImgToImagePlus
 {
-	private ArrayImgToVirtualStack()
+	private ArrayImgToImagePlus()
 	{
 		// prevent from instantiation
 	}
@@ -64,8 +65,8 @@ public class ArrayImgToVirtualStack
 	/**
 	 * Indicates if {@link #wrap(ImgPlus)} wrap} supports the image.
 	 *
-	 * @see PlanarImgToVirtualStack
-	 * @see ImgToVirtualStack
+	 * @see PlanarImgToImagePlus
+	 * @see ImgPlusToImagePlus
 	 */
 	public static boolean isSupported( ImgPlus< ? > imgPlus )
 	{
@@ -91,8 +92,8 @@ public class ArrayImgToVirtualStack
 	 * Use {@link #isSupported(ImgPlus)} to check if an {@link ImagePlus} is
 	 * supported.
 	 *
-	 * @see PlanarImgToVirtualStack
-	 * @see ImgToVirtualStack
+	 * @see PlanarImgToImagePlus
+	 * @see ImgPlusToImagePlus
 	 */
 	public static ImagePlus wrap( ImgPlus< ? > imgPlus )
 	{
