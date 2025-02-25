@@ -48,6 +48,7 @@ import net.imagej.axis.AxisType;
 import net.imagej.axis.CalibratedAxis;
 import net.imglib2.Interval;
 import net.imglib2.imagej.ImgPlusViews;
+import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
@@ -73,11 +74,11 @@ import ij.VirtualStack;
  * without copying data. It is restricted to certain pixel types:
  * UnsignedByteType, UnsignedShortType, ARGBType and FloatType.
  *
- * @see ArrayImgToVirtualStack
- * @see ImgToVirtualStack
- * @see CellImgToVirtualStack
+ * @see ArrayImgToImagePlus
+ * @see ImgPlusToImagePlus
+ * @see CellImgToImagePlus
  */
-public class PlanarImgToVirtualStack extends AbstractVirtualStack
+public class PlanarImgToImagePlus extends AbstractVirtualStack
 {
 
 	// static
@@ -117,7 +118,7 @@ public class PlanarImgToVirtualStack extends AbstractVirtualStack
 		if ( !( img instanceof PlanarImg ) )
 			throw new IllegalArgumentException( "Image must be a PlanarImg." );
 		final IntUnaryOperator indexer = getIndexer( imgPlus );
-		final VirtualStack stack = new PlanarImgToVirtualStack( ( PlanarImg< ?, ? > ) img, indexer );
+		final VirtualStack stack = new PlanarImgToImagePlus( ( PlanarImg< ?, ? > ) img, indexer );
 		final ImagePlus imagePlus = new ImagePlus( imgPlus.getName(), stack );
 		imagePlus.setDimensions( dimension( imgPlus, Axes.CHANNEL ), dimension( imgPlus, Axes.Z ), dimension( imgPlus, Axes.TIME ) );
 		CalibrationUtils.copyCalibrationToImagePlus( imgPlus, imagePlus );
@@ -132,7 +133,7 @@ public class PlanarImgToVirtualStack extends AbstractVirtualStack
 
 	public static VirtualStack wrap( final PlanarImg< ?, ? > img )
 	{
-		return new PlanarImgToVirtualStack( img, x -> x );
+		return new PlanarImgToImagePlus( img, x -> x );
 	}
 
 	// fields
@@ -143,7 +144,7 @@ public class PlanarImgToVirtualStack extends AbstractVirtualStack
 
 	// constructor
 
-	private PlanarImgToVirtualStack( final PlanarImg< ?, ? > img, final IntUnaryOperator indexer )
+	private PlanarImgToImagePlus(final PlanarImg< ?, ? > img, final IntUnaryOperator indexer )
 	{
 		super( ( int ) img.dimension( 0 ), ( int ) img.dimension( 1 ), initSize( img ), getBitDepth( img.randomAccess().get() ) );
 		this.img = img;

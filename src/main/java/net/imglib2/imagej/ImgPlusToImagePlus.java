@@ -32,7 +32,7 @@
  * #L%
  */
 
-package net.imglib2.imagej.display;
+package net.imglib2.imagej;
 
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +44,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.imagej.ImgPlusViews;
+import net.imglib2.imagej.display.*;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.ARGBType;
@@ -54,7 +54,7 @@ import net.imglib2.view.Views;
 
 import ij.ImagePlus;
 
-public class ImgToVirtualStack
+public class ImgPlusToImagePlus
 {
 	// TODO move to image-legacy
 	public static ImagePlus wrap( final ImgPlus< ? extends RealType< ? > > imgPlus, final boolean mergeRGB )
@@ -72,27 +72,27 @@ public class ImgToVirtualStack
 	 * Only up to five dimensions are support. Axes can might be arbitrary. The
 	 * image title and calibration are derived from the given image.
 	 *
-	 * @see ArrayImgToVirtualStack
-	 * @see ImgToVirtualStack
+	 * @see ArrayImgToImagePlus
+	 * @see ImgPlusToImagePlus
 	 */
 	public static ImagePlus wrap( final ImgPlus< ? > imgPlus )
 	{
-		return wrap( imgPlus, ImgToVirtualStack::createVirtualStack );
+		return wrap( imgPlus, ImgPlusToImagePlus::createVirtualStack );
 	}
 
 	/**
 	 * Similar to {@link #wrap(ImgPlus)}, but works only for {@link ImgPlus} of
 	 * {@link BitType}. The pixel values of 0 and 1 are scaled to 0 and 255.
 	 *
-	 * @see ArrayImgToVirtualStack
-	 * @see ImgToVirtualStack
+	 * @see ArrayImgToImagePlus
+	 * @see ImgPlusToImagePlus
 	 */
 	public static ImagePlus wrapAndScaleBitType( final ImgPlus< BitType > imgPlus )
 	{
-		return wrap( imgPlus, ImgToVirtualStack::createVirtualStackBits );
+		return wrap( imgPlus, ImgPlusToImagePlus::createVirtualStackBits );
 	}
 
-	private static < T > ImagePlus wrap( ImgPlus< T > imgPlus, final Function< RandomAccessibleInterval< T >, ImageJVirtualStack<?> > imageStackWrapper )
+	private static < T > ImagePlus wrap( ImgPlus< T > imgPlus, final Function< RandomAccessibleInterval< T >, ImageJVirtualStack<?>> imageStackWrapper )
 	{
 		imgPlus = ImgPlusViews.fixAxes( imgPlus );
 		final RandomAccessibleInterval< T > sorted = ensureXYCZT( imgPlus );

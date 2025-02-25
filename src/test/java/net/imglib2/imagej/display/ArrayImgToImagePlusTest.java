@@ -53,7 +53,7 @@ import org.junit.Test;
 
 import ij.ImagePlus;
 
-public class ArrayImgToVirtualStackTest
+public class ArrayImgToImagePlusTest
 {
 	@Test
 	public void testSharedBuffer()
@@ -62,7 +62,7 @@ public class ArrayImgToVirtualStackTest
 		final int height = 3;
 		final byte[] buffer = new byte[ width * height ];
 		final ImgPlus< UnsignedByteType > img = new ImgPlus<>( ArrayImgs.unsignedBytes( buffer, width, height ) );
-		final ImagePlus imagePlus = ArrayImgToVirtualStack.wrap( img );
+		final ImagePlus imagePlus = ArrayImgToImagePlus.wrap( img );
 		assertEquals( width, imagePlus.getWidth() );
 		assertEquals( height, imagePlus.getHeight() );
 		assertSame( buffer, imagePlus.getProcessor().getPixels() );
@@ -75,9 +75,9 @@ public class ArrayImgToVirtualStackTest
 		final ImgPlus< UnsignedByteType > unsupported1 = new ImgPlus<>( ArrayImgs.unsignedBytes( 2, 2, 3 ), "image", new AxisType[] { Axes.X, Axes.Y, Axes.Z } );
 		final CellImg< UnsignedByteType, ? > cellImg = new CellImgFactory<>( new UnsignedByteType() ).create( 2, 2 );
 		final ImgPlus< UnsignedByteType > unsupported2 = new ImgPlus<>( cellImg, "image", new AxisType[] { Axes.X, Axes.Y } );
-		assertTrue( ArrayImgToVirtualStack.isSupported( supported ) );
-		assertFalse( ArrayImgToVirtualStack.isSupported( unsupported1 ) );
-		assertFalse( ArrayImgToVirtualStack.isSupported( unsupported2 ) );
+		assertTrue( ArrayImgToImagePlus.isSupported( supported ) );
+		assertFalse( ArrayImgToImagePlus.isSupported( unsupported1 ) );
+		assertFalse( ArrayImgToImagePlus.isSupported( unsupported2 ) );
 	}
 
 	@Test
@@ -87,7 +87,7 @@ public class ArrayImgToVirtualStackTest
 		final float expected = 42.0f;
 		final Img< FloatType > img = ArrayImgs.floats( 1, 1 );
 		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y } );
-		final ImagePlus imagePlus = ArrayImgToVirtualStack.wrap( imgPlus );
+		final ImagePlus imagePlus = ArrayImgToImagePlus.wrap( imgPlus );
 		// process
 		imagePlus.getProcessor().setf( 0, 0, expected );
 		// test
