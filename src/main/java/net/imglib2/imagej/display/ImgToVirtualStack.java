@@ -44,6 +44,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.imagej.ImgPlusViews;
 import net.imglib2.transform.integer.MixedTransform;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.ARGBType;

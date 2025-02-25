@@ -31,7 +31,7 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.imagej.display;
+package net.imglib2.imagej;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
