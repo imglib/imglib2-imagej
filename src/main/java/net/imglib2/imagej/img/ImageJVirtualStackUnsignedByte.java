@@ -32,7 +32,7 @@
  * #L%
  */
 
-package net.imglib2.imagej.display;
+package net.imglib2.imagej.img;
 
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.Sampler;

@@ -39,7 +39,7 @@ import net.imagej.ImgPlus;
 import net.imagej.axis.CalibratedAxis;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.ref.SoftRefLoaderCache;
-import net.imglib2.imagej.display.CalibrationUtils;
+import net.imglib2.imagej.img.CalibrationUtils;
 import net.imglib2.img.basictypeaccess.array.*;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.NativeType;

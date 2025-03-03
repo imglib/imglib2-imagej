@@ -32,7 +32,7 @@
  * #L%
  */
 
-package net.imglib2.imagej.display;
+package net.imglib2.imagej.img;
 
 import java.util.ArrayList;
 import java.util.List;

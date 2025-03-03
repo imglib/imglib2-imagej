@@ -31,19 +31,18 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.imagej.display;
+package net.imglib2.imagej.img;
 
-import ij.ImageStack;
 import net.imagej.ImgPlus;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
 import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
-import net.imglib2.img.array.ArrayImgFactory;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.type.numeric.real.FloatType;
+
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -53,71 +52,86 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
-
 @State( Scope.Benchmark )
-public class ImageJVirtualStackGetProcessorBenchmark
+public class ImgLib2ToVirtualStackBenchmark
 {
 
-	private final ConcurrentMap< Object, Img<?> > cache = new ConcurrentHashMap<>();
+	long[] smallDims = { 10, 10, 10 };
+	long[] deepDims = { 10, 10, 1000000 };
+	long[] cubicDims = { 1000, 1000, 1000 };
 
-	private < T extends NativeType<T> > Img< T > getImage(T type) {
-		return ( Img< T > ) cache.computeIfAbsent( type, ignore -> new ArrayImgFactory<>( type ).create( 200, 200, 200 ) );
-	}
-
-	@Benchmark
-	public void bytes() {
-		test( new UnsignedByteType() );
-	}
-
-	@Benchmark
-	public void shorts() {
-		test( new UnsignedShortType() );
-	}
+	private final ImgPlus< UnsignedByteType > smallCellImage = makeImgPlus( createCellImg( deepDims ) );
+	private final ImgPlus< UnsignedByteType > deepCellImage = makeImgPlus( createCellImg( deepDims ) );
+	private final ImgPlus< UnsignedByteType > cubicCellImage = makeImgPlus( createCellImg( cubicDims ) );
+	private final ImgPlus< UnsignedByteType > smallPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( smallDims ) );
+	private final ImgPlus< UnsignedByteType > cubicPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( cubicDims ) );
+	private final ImgPlus< UnsignedByteType > deepPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( deepDims ) );
+	private final ImgPlus< UnsignedByteType > small2dArrayImg = makeImgPlus( ArrayImgs.unsignedBytes( 10, 10 ) );
+	private final ImgPlus< UnsignedByteType > big2dArrayImg = makeImgPlus( ArrayImgs.unsignedBytes( 10000, 10000 ) );
 
 	@Benchmark
-	public void floats() {
-		test( new FloatType() );
-	}
-
-	@Benchmark
-	public void doubles() {
-		test( new DoubleType() );
-	}
-
-	@Benchmark
-	public void ints() {
-		test( new DoubleType() );
-	}
-
-	@Benchmark
-	public void argbs() {
-		test( new ARGBType() );
-	}
-
-	@Benchmark
-	public void all() {
-		test( new UnsignedByteType() );
-		test( new UnsignedShortType() );
-		test( new FloatType() );
-		test( new ARGBType() );
-	}
-
-	private < T extends NativeType< T > > void test( T type )
+	public void testSmallCellImg()
 	{
-		Img< T > image = getImage( type );
-		ImageStack stack = ImgPlusToImagePlus.wrap( new ImgPlus<>( image ) ).getStack();
-		for ( int i = 0; i < stack.getSize(); i++ )
-		{
-			stack.getProcessor( i + 1 );
-		}
+		ImgPlusToImagePlus.wrap( smallCellImage );
+	}
+
+	@Benchmark
+	public void testDeepCellImg()
+	{
+		ImgPlusToImagePlus.wrap( deepCellImage );
+	}
+
+	@Benchmark
+	public void testCubicCellImg()
+	{
+		ImgPlusToImagePlus.wrap( cubicCellImage );
+	}
+
+	@Benchmark
+	public void testSmallPlanarImg()
+	{
+		PlanarImgToImagePlus.wrap( smallPlanarImg );
+	}
+
+	@Benchmark
+	public void testCubicPlanarImg()
+	{
+		PlanarImgToImagePlus.wrap( cubicPlanarImg );
+	}
+
+	@Benchmark
+	public void testDeepPlanarImg()
+	{
+		PlanarImgToImagePlus.wrap( deepPlanarImg );
+	}
+
+	@Benchmark
+	public void testSmall2dArrayImg()
+	{
+		ArrayImgToImagePlus.wrap( small2dArrayImg );
+	}
+
+	@Benchmark
+	public void testLarge2dArrayImg()
+	{
+		ArrayImgToImagePlus.wrap( big2dArrayImg );
+	}
+
+	private ImgPlus< UnsignedByteType > makeImgPlus( final Img< UnsignedByteType > deepPlanarImg )
+	{
+		final AxisType[] axes = { Axes.X, Axes.Y, Axes.Z };
+		return new ImgPlus<>( deepPlanarImg, "title", axes );
+	}
+
+	private Img< UnsignedByteType > createCellImg( final long... dim )
+	{
+		return new CellImgFactory<>( new UnsignedByteType() ).create( dim );
 	}
 
 	public static void main( final String... args ) throws RunnerException
 	{
 		final Options opt = new OptionsBuilder()
-				.include( ImageJVirtualStackGetProcessorBenchmark.class.getSimpleName() )
+				.include( ImgLib2ToVirtualStackBenchmark.class.getSimpleName() )
 				.forks( 0 )
 				.warmupIterations( 4 )
 				.measurementIterations( 8 )

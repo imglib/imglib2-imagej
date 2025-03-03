@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * ImgLib2: a general-purpose, multidimensional image processing library.
  * %%
@@ -31,40 +31,53 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package net.imglib2.imagej.img;
 
-package net.imglib2.imagej.display;
-
-import java.util.concurrent.ExecutorService;
-
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.converter.Converter;
-import net.imglib2.type.numeric.ARGBType;
+import ij.ImagePlus;
+import net.imglib2.Cursor;
+import net.imglib2.imagej.RAIToImagePlus;
+import net.imglib2.img.Img;
+import net.imglib2.img.ImgFactory;
+import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.type.logic.BitType;
+import org.junit.Assert;
+import org.junit.Test;
 
 /**
- * TODO
  *
+ * @author cyril
  */
-public class ImageJVirtualStackARGB extends ImageJVirtualStack< ARGBType >
+public class ImageJFunctionDatasetTransformation
 {
-	public static ImageJVirtualStackARGB wrap( final RandomAccessibleInterval< ARGBType > source )
-	{
-		return new ImageJVirtualStackARGB( source );
-	}
 
-	public < S > ImageJVirtualStackARGB( final RandomAccessibleInterval< S > source, final Converter< ? super S, ARGBType > converter )
+	@Test
+	public void transformBitDataset()
 	{
-		this( source, converter, null );
-	}
 
-	public < S > ImageJVirtualStackARGB( final RandomAccessibleInterval< S > source, final Converter< ? super S, ARGBType > converter, final ExecutorService service )
-	{
-		super( source, converter, new ARGBType(), 24, service );
-		setMinAndMax( 0, 255 );
-	}
+		final ImgFactory< BitType > imgFactory = new CellImgFactory<>( new BitType(), 5 );
 
-	private ImageJVirtualStackARGB( final RandomAccessibleInterval< ARGBType > source )
-	{
-		super( source, 24 );
-		setMinAndMax( 0, 255 );
+		// create an 3d-Img with dimensions 20x30x40 (here cellsize is 5x5x5)Ø
+		final Img< BitType > img1 = imgFactory.create( 20, 30, 40 );
+
+		Cursor< BitType > cursor = img1.cursor();
+
+		cursor.reset();
+		// setting all the pixels as white
+		while ( cursor.hasNext() )
+		{
+			cursor.fwd();
+			cursor.get().set( new BitType( true ) );
+		}
+
+		ImagePlus imp = RAIToImagePlus.wrap( img1, "" );
+
+		Assert.assertEquals( ImagePlus.GRAY8, imp.getType() );
+		Assert.assertEquals( 255, imp.getStatistics().min, 0 );
+
 	}
 }

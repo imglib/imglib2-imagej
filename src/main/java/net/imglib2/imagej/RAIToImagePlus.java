@@ -9,7 +9,7 @@ import net.imglib2.converter.ComplexPowerGLogFloatConverter;
 import net.imglib2.converter.Converter;
 import net.imglib2.converter.Converters;
 import net.imglib2.converter.RealUnsignedByteConverter;
-import net.imglib2.imagej.display.*;
+import net.imglib2.imagej.img.*;
 import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.*;
 import net.imglib2.type.numeric.integer.UnsignedByteType;

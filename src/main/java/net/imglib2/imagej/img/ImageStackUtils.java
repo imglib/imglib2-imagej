@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * ImgLib2: a general-purpose, multidimensional image processing library.
  * %%
@@ -31,53 +31,58 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
-package net.imglib2.imagej.display;
+package net.imglib2.imagej.img;
 
-import ij.ImagePlus;
-import net.imglib2.Cursor;
-import net.imglib2.imagej.RAIToImagePlus;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgFactory;
-import net.imglib2.img.cell.CellImgFactory;
-import net.imglib2.type.logic.BitType;
-import org.junit.Assert;
-import org.junit.Test;
+import ij.ImageStack;
+import ij.process.ImageProcessor;
 
 /**
+ * Utility functions for the implementation of {@link AbstractVirtualStack}.
  *
- * @author cyril
+ * @author Matthias Arzt
  */
-public class ImageJFunctionDatasetTransformation
+class ImageStackUtils
 {
-
-	@Test
-	public void transformBitDataset()
+	private ImageStackUtils()
 	{
+		// prevent from instantiation
+	}
 
-		final ImgFactory< BitType > imgFactory = new CellImgFactory<>( new BitType(), 5 );
+	/**
+	 * Creates a copy of a given {@link ImageStack}.
+	 */
+	public static ImageStack duplicate( ImageStack original )
+	{
+		return crop( original, 0, 0, 0, original.getWidth(), original.getHeight(), original.getSize() );
+	}
 
-		// create an 3d-Img with dimensions 20x30x40 (here cellsize is 5x5x5)Ø
-		final Img< BitType > img1 = imgFactory.create( 20, 30, 40 );
-
-		Cursor< BitType > cursor = img1.cursor();
-
-		cursor.reset();
-		// setting all the pixels as white
-		while ( cursor.hasNext() )
+	/**
+	 * Creates a new {@link ImageStack} by cropping the given stack
+	 */
+	public static ImageStack crop( ImageStack stack, int x, int y, int z, int width, int height, int depth )
+	{
+		if ( x < 0 || y < 0 || z < 0 || x + width > stack.getWidth() || y + height > stack.getHeight() || z + depth > stack.getSize() )
+			throw new IllegalArgumentException( "Argument out of range" );
+		ImageStack result = new ImageStack( width, height, stack.getColorModel() );
+		for ( int i = z; i < z + depth; i++ )
 		{
-			cursor.fwd();
-			cursor.get().set( new BitType( true ) );
+			ImageProcessor ip = stack.getProcessor( i + 1 );
+			ip.setRoi( x, y, width, height );
+			result.addSlice( stack.getSliceLabel( i + 1 ), ip.crop() );
 		}
+		return result;
+	}
 
-		ImagePlus imp = RAIToImagePlus.wrap( img1, "" );
-
-		Assert.assertEquals( ImagePlus.GRAY8, imp.getType() );
-		Assert.assertEquals( 255, imp.getStatistics().min, 0 );
-
+	/**
+	 * Create a new {@link ImageStack} with same content but featuring {@link ij.process.FloatProcessor}s.
+	 */
+	public static ImageStack convertToFloat( ImageStack stack )
+	{
+		ImageStack result = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getColorModel());
+		for (int i=1; i<= stack.getSize(); i++) {
+			ImageProcessor ip = stack.getProcessor(i);
+			result.addSlice(stack.getSliceLabel(i), ip.convertToFloat() );
+		}
+		return result;
 	}
 }

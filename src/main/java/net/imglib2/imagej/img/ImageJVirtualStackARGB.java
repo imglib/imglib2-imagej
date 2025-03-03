@@ -31,58 +31,40 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.imagej.display;
 
-import ij.ImageStack;
-import ij.process.ImageProcessor;
+package net.imglib2.imagej.img;
+
+import java.util.concurrent.ExecutorService;
+
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.converter.Converter;
+import net.imglib2.type.numeric.ARGBType;
 
 /**
- * Utility functions for the implementation of {@link AbstractVirtualStack}.
+ * TODO
  *
- * @author Matthias Arzt
  */
-class ImageStackUtils
+public class ImageJVirtualStackARGB extends ImageJVirtualStack< ARGBType >
 {
-	private ImageStackUtils()
+	public static ImageJVirtualStackARGB wrap( final RandomAccessibleInterval< ARGBType > source )
 	{
-		// prevent from instantiation
+		return new ImageJVirtualStackARGB( source );
 	}
 
-	/**
-	 * Creates a copy of a given {@link ImageStack}.
-	 */
-	public static ImageStack duplicate( ImageStack original )
+	public < S > ImageJVirtualStackARGB( final RandomAccessibleInterval< S > source, final Converter< ? super S, ARGBType > converter )
 	{
-		return crop( original, 0, 0, 0, original.getWidth(), original.getHeight(), original.getSize() );
+		this( source, converter, null );
 	}
 
-	/**
-	 * Creates a new {@link ImageStack} by cropping the given stack
-	 */
-	public static ImageStack crop( ImageStack stack, int x, int y, int z, int width, int height, int depth )
+	public < S > ImageJVirtualStackARGB( final RandomAccessibleInterval< S > source, final Converter< ? super S, ARGBType > converter, final ExecutorService service )
 	{
-		if ( x < 0 || y < 0 || z < 0 || x + width > stack.getWidth() || y + height > stack.getHeight() || z + depth > stack.getSize() )
-			throw new IllegalArgumentException( "Argument out of range" );
-		ImageStack result = new ImageStack( width, height, stack.getColorModel() );
-		for ( int i = z; i < z + depth; i++ )
-		{
-			ImageProcessor ip = stack.getProcessor( i + 1 );
-			ip.setRoi( x, y, width, height );
-			result.addSlice( stack.getSliceLabel( i + 1 ), ip.crop() );
-		}
-		return result;
+		super( source, converter, new ARGBType(), 24, service );
+		setMinAndMax( 0, 255 );
 	}
 
-	/**
-	 * Create a new {@link ImageStack} with same content but featuring {@link ij.process.FloatProcessor}s.
-	 */
-	public static ImageStack convertToFloat( ImageStack stack )
+	private ImageJVirtualStackARGB( final RandomAccessibleInterval< ARGBType > source )
 	{
-		ImageStack result = new ImageStack(stack.getWidth(), stack.getHeight(), stack.getColorModel());
-		for (int i=1; i<= stack.getSize(); i++) {
-			ImageProcessor ip = stack.getProcessor(i);
-			result.addSlice(stack.getSliceLabel(i), ip.convertToFloat() );
-		}
-		return result;
+		super( source, 24 );
+		setMinAndMax( 0, 255 );
 	}
 }
