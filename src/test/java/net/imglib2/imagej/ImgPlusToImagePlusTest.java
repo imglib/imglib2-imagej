@@ -34,9 +34,6 @@
 
 package net.imglib2.imagej;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imagej.ImgPlus;
@@ -77,6 +74,8 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
+
+import static org.junit.Assert.*;
 
 public class ImgPlusToImagePlusTest
 {
@@ -235,7 +234,7 @@ public class ImgPlusToImagePlusTest
 
 	private < T extends RealType< T > > void testTypeConversion( final Class< ? extends ImageProcessor > processorClass, final float expected, final T input )
 	{
-		final RandomAccessibleInterval< T > rai = ConstantUtils.constantRandomAccessibleInterval( input, 2, new FinalInterval( 1, 1 ) );
+		final RandomAccessibleInterval< T > rai = ConstantUtils.constantRandomAccessibleInterval( input, new FinalInterval( 1, 1 ) );
 		final Img< T > image = ImgView.wrap( rai, null );
 		final ImgPlus< T > imgPlus = new ImgPlus< T >( image, "title", new AxisType[] { Axes.X, Axes.Y } );
 		// process
@@ -246,7 +245,7 @@ public class ImgPlusToImagePlusTest
 		Assert.assertEquals( expected, processor.getPixelValue( 0, 0 ), 0f );
 	}
 
-	private void fill( final RandomAccessibleInterval< ? extends IntegerType > img )
+	private void fill( final RandomAccessibleInterval< ? extends IntegerType<?> > img )
 	{
 		final AtomicInteger i = new AtomicInteger();
 		Views.flatIterable( img ).forEach( pixel -> pixel.setInteger( i.incrementAndGet() ) );
@@ -299,6 +298,6 @@ public class ImgPlusToImagePlusTest
 																	// data
 																	// changed
 		// test
-		assertEquals( true, img.cursor().next().get() );
+        assertTrue(img.cursor().next().get());
 	}
 }
