@@ -165,7 +165,7 @@ public class PlanarImgToImagePlusTest
 	@Test
 	public void testConvertingBackAndForth() {
 		ImagePlus imagePlus = IJ.createImage( "test", "8-bit ramp", 3, 3, 3 );
-		ImgPlus< UnsignedByteType > convertedImg = ImagePlusToImgPlus.wrapByteLazily( imagePlus );
+		ImgPlus< UnsignedByteType > convertedImg = ImagePlusToImgPlus.wrapByte( imagePlus );
 		ImagePlus twiceConvertedImagePlus = PlanarImgToImagePlus.wrap( convertedImg );
 		twiceConvertedImagePlus.getStack().getProcessor( 1 ).set( 0, 0, 5 );
 		assertEquals( 5, imagePlus.getStack().getProcessor( 1 ).get( 0, 0 ) );

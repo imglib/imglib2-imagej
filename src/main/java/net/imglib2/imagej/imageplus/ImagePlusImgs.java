@@ -34,27 +34,15 @@
 
 package net.imglib2.imagej.imageplus;
 
-import net.imglib2.imagej.ImagePlusToImgPlus;
-import net.imglib2.img.basictypeaccess.array.DoubleArray;
-import net.imglib2.type.NativeType;
-import net.imglib2.type.Type;
-import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.NumericType;
-import net.imglib2.type.numeric.complex.ComplexDoubleType;
-import net.imglib2.type.numeric.complex.ComplexFloatType;
-import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.ShortType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.FloatType;
-
-import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ShortProcessor;
+import net.imglib2.type.Type;
+import net.imglib2.type.numeric.ARGBType;
+import net.imglib2.type.numeric.complex.ComplexFloatType;
+import net.imglib2.type.numeric.integer.*;
+import net.imglib2.type.numeric.real.FloatType;
 
 /**
  * Convenience factory methods for creation of {@link ImagePlusImg} instances
@@ -84,7 +72,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public ByteImagePlus< UnsignedByteType > unsignedBytes( final long... dim )
+    static public ByteImagePlus< UnsignedByteType > unsignedBytes(final long... dim)
 	{
 		return ( ByteImagePlus< UnsignedByteType > ) new ImagePlusImgFactory<>( new UnsignedByteType() ).create( dim );
 	}
@@ -97,7 +85,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public ByteImagePlus< ByteType > bytes( final long... dim )
+    static public ByteImagePlus< ByteType > bytes(final long... dim)
 	{
 		return ( ByteImagePlus< ByteType > ) new ImagePlusImgFactory<>( new ByteType() ).create( dim );
 	}
@@ -111,7 +99,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public ShortImagePlus< UnsignedShortType > unsignedShorts( final long... dim )
+    static public ShortImagePlus< UnsignedShortType > unsignedShorts(final long... dim)
 	{
 		return ( ShortImagePlus< UnsignedShortType > ) new ImagePlusImgFactory<>( new UnsignedShortType() ).create( dim );
 	}
@@ -124,7 +112,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public ShortImagePlus< ShortType > shorts( final long... dim )
+    static public ShortImagePlus< ShortType > shorts(final long... dim)
 	{
 		return ( ShortImagePlus< ShortType > ) new ImagePlusImgFactory<>( new ShortType() ).create( dim );
 	}
@@ -139,7 +127,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public IntImagePlus< UnsignedIntType > unsignedInts( final long... dim )
+    static public IntImagePlus< UnsignedIntType > unsignedInts(final long... dim)
 	{
 		return ( IntImagePlus< UnsignedIntType > ) new ImagePlusImgFactory<>( new UnsignedIntType() ).create( dim );
 	}
@@ -154,7 +142,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public IntImagePlus< IntType > ints( final long... dim )
+    static public IntImagePlus< IntType > ints(final long... dim)
 	{
 		return ( IntImagePlus< IntType > ) new ImagePlusImgFactory<>( new IntType() ).create( dim );
 	}
@@ -167,7 +155,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public FloatImagePlus< FloatType > floats( final long... dim )
+    static public FloatImagePlus< FloatType > floats(final long... dim)
 	{
 		return ( FloatImagePlus< FloatType > ) new ImagePlusImgFactory<>( new FloatType() ).create( dim );
 	}
@@ -180,7 +168,7 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public IntImagePlus< ARGBType > argbs( final long... dim )
+    static public IntImagePlus< ARGBType > argbs(final long... dim)
 	{
 		return ( IntImagePlus< ARGBType > ) new ImagePlusImgFactory<>( new ARGBType() ).create( dim );
 	}
@@ -196,17 +184,8 @@ final public class ImagePlusImgs
 	 * </p>
 	 */
 	@SuppressWarnings( "unchecked" )
-	final static public FloatImagePlus< ComplexFloatType > complexFloats( final long... dim )
+	static public FloatImagePlus< ComplexFloatType > complexFloats( final long... dim )
 	{
 		return ( FloatImagePlus< ComplexFloatType > ) new ImagePlusImgFactory<>( new ComplexFloatType() ).create( dim );
-	}
-
-	/**
-	 * Create an {@link ImagePlusImg}{@code <}{@link ComplexDoubleType},
-	 * {@link DoubleArray}{@code >}.
-	 */
-	final static public < T extends NumericType< T > & NativeType< T > > ImagePlusImg< T, ? > from( final ImagePlus imp )
-	{
-		return ImagePlusToImgPlus.< T >wrap( imp );
 	}
 }

@@ -61,8 +61,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testUnsignedByte()
 	{
 		final ImagePlus image = randomImagePlus( 123, new UnsignedByteType(), DIMENSIONS );
-		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByteLazily( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -70,8 +70,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testUnsignedShort()
 	{
 		final ImagePlus image = randomImagePlus( 234, new UnsignedShortType(), DIMENSIONS );
-		final Img< UnsignedShortType > actual = ImagePlusToImgPlus.wrapShortLazily( image );
-		final Img< UnsignedShortType > expected = ImagePlusToImgPlus.wrapShort( image );
+		final Img< UnsignedShortType > actual = ImagePlusToImgPlus.wrapShort( image );
+		final Img< UnsignedShortType > expected = ImagePlusToImg.wrapShort( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -79,8 +79,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testRGB()
 	{
 		final ImagePlus image = randomImagePlus( 345, new ARGBType(), DIMENSIONS );
-		final Img< ARGBType > actual = ImagePlusToImgPlus.wrapRGBALazily( image );
-		final Img< ARGBType > expected = ImagePlusToImgPlus.wrapRGBA( image );
+		final Img< ARGBType > actual = ImagePlusToImgPlus.wrapRGBA( image );
+		final Img< ARGBType > expected = ImagePlusToImg.wrapRGBA( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -88,8 +88,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testFloat()
 	{
 		final ImagePlus image = randomImagePlus( 456, new FloatType(), DIMENSIONS );
-		final Img< FloatType > actual = ImagePlusToImgPlus.wrapFloatLazily( image );
-		final Img< FloatType > expected = ImagePlusToImgPlus.wrapFloat( image );
+		final Img< FloatType > actual = ImagePlusToImgPlus.wrapFloat( image );
+		final Img< FloatType > expected = ImagePlusToImg.wrapFloat( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -97,8 +97,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testLowerNumDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 567, new UnsignedByteType(), 2, 3, 6 );
-		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByteLazily( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -106,8 +106,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testSingletonDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 678, new UnsignedByteType(), 2, 1, 1, 6 );
-		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByteLazily( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByte( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByte( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 

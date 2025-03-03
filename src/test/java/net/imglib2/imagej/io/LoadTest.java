@@ -33,26 +33,22 @@
  */
 package net.imglib2.imagej.io;
 
-import java.util.Arrays;
-import java.util.stream.Collectors;
-
-import ij.CompositeImage;
-import ij.IJ;
-import ij.ImageJ;
-import ij.ImagePlus;
-import ij.VirtualStack;
+import ij.*;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.cache.img.CachedCellImg;
-import net.imglib2.imagej.ImagePlusToImgPlus;
+import net.imglib2.imagej.ImagePlusToImg;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.view.IntervalView;
 import net.imglib2.view.Views;
+
+import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class LoadTest
 {
@@ -123,12 +119,12 @@ public class LoadTest
 	
 	public void testStackDefault()
 	{
-		final RandomAccessibleInterval< ? > img = Views.stack( Arrays.stream( paths )
+		final RandomAccessibleInterval< UnsignedShortType > img = Views.stack( Arrays.stream( paths )
 				.map( IJ::openImage )
-				.map( ImagePlusToImgPlus::wrap )
+				.map(ImagePlusToImg::wrapShort)
 				.collect( Collectors.toList() ) );
 		
-		show( ( RandomAccessibleInterval< UnsignedShortType > )img, "stack", 1, ( int )img.dimension( 2 ), ( int )img.dimension( 3 ) );
+		show(img, "stack", 1, ( int )img.dimension( 2 ), ( int )img.dimension( 3 ) );
 	}
 	
 	static public void main( final String[] args )

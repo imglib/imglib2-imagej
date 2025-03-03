@@ -36,7 +36,7 @@ package net.imglib2.imagej.display;
 
 import ij.IJ;
 import ij.ImagePlus;
-import net.imglib2.imagej.ImagePlusToImgPlus;
+import net.imglib2.imagej.ImagePlusToImg;
 import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.ARGBType;
@@ -69,36 +69,36 @@ public class ImageJFunctionBehavior
 
 		// 1. Test ImagePlus -> Img, specific wrappers
 		IJ.run( imp, "8-bit", "" );
-		final Img< UnsignedByteType > imgb = ImagePlusToImgPlus.wrapByte( imp );
+		final Img< UnsignedByteType > imgb = ImagePlusToImg.wrapByte( imp );
 		print( imgb );
 
 		IJ.run( imp, "16-bit", "" );
-		final Img< UnsignedShortType > imgs = ImagePlusToImgPlus.wrapShort( imp );
+		final Img< UnsignedShortType > imgs = ImagePlusToImg.wrapShort( imp );
 		print( imgs );
 
 		IJ.run( imp, "32-bit", "" );
-		final Img< FloatType > imgf = ImagePlusToImgPlus.wrapFloat( imp );
+		final Img< FloatType > imgf = ImagePlusToImg.wrapFloat( imp );
 		print( imgf );
 
 		IJ.run( imp, "RGB Color", "" );
-		final Img< ARGBType > imgRGB = ImagePlusToImgPlus.wrapRGBA( imp );
+		final Img< ARGBType > imgRGB = ImagePlusToImg.wrapRGBA( imp );
 		print( imgRGB );
 
 		// 2. Test ImagePlus -> Img, generic wrapper
 		IJ.run( imp, "8-bit", "" );
-		final Img< UnsignedByteType > g_imgb = ImagePlusToImgPlus.wrap( imp );
+		final Img< UnsignedByteType > g_imgb = (Img<UnsignedByteType>) ImagePlusToImg.wrap( imp );
 		print( g_imgb );
 
 		IJ.run( imp, "16-bit", "" );
-		final Img< UnsignedShortType > g_imgs = ImagePlusToImgPlus.wrap( imp );
+		final Img< UnsignedShortType > g_imgs = (Img<UnsignedShortType>) ImagePlusToImg.wrap( imp );
 		print( g_imgs );
 
 		IJ.run( imp, "32-bit", "" );
-		final Img< FloatType > g_imgf = ImagePlusToImgPlus.wrap( imp );
+		final Img< FloatType > g_imgf = (Img<FloatType>) ImagePlusToImg.wrap( imp );
 		print( g_imgf );
 
 		IJ.run( imp, "RGB Color", "" );
-		final Img< ARGBType > g_imgRGB = ImagePlusToImgPlus.wrap( imp );
+		final Img< ARGBType > g_imgRGB = (Img<ARGBType>) ImagePlusToImg.wrap( imp );
 		print( g_imgRGB );
 
 		// 3. Test Img -> ImagePlus, specific wrappers

@@ -34,18 +34,16 @@
 
 package net.imglib2.imagej;
 
-import static org.junit.Assert.assertEquals;
-
+import ij.ImagePlus;
+import ij.gui.NewImage;
+import ij.measure.Calibration;
 import net.imagej.ImgPlus;
 import net.imagej.axis.Axes;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.NumericType;
-
 import org.junit.Test;
 
-import ij.ImagePlus;
-import ij.gui.NewImage;
-import ij.measure.Calibration;
+import static org.junit.Assert.assertEquals;
 
 public class ImagePlusToImgPlusTest< T extends NumericType< T > & NativeType< T > >
 {
@@ -88,7 +86,7 @@ public class ImagePlusToImgPlusTest< T extends NumericType< T > & NativeType< T 
 	private void testDimensionality( final int[] dim, final float[] calibration )
 	{
 		final ImagePlus imp = createCalibratedImagePlus( dim, calibration );
-		final ImgPlus< T > img = ImagePlusToImgPlus.wrapImgPlus( imp );
+		final ImgPlus< ? > img = ImagePlusToImgPlus.wrap( imp );
 		// Print stuff
 //		System.out.println( "got: " + img.getName() );
 //		for ( int d = 0; d < img.numDimensions(); d++ )
@@ -136,7 +134,7 @@ public class ImagePlusToImgPlusTest< T extends NumericType< T > & NativeType< T 
 		return expectedNumDimensions;
 	}
 
-	private void checkDimensionality( final int[] dim, final ImgPlus< T > img )
+	private void checkDimensionality( final int[] dim, final ImgPlus< ? > img )
 	{
 		int skipDim = 0;
 		for ( int d = 0; d < dim.length; d++ )
@@ -153,7 +151,7 @@ public class ImagePlusToImgPlusTest< T extends NumericType< T > & NativeType< T 
 		}
 	}
 
-	private void checkCalibration( final int[] dim, final float[] calibration, final ImgPlus< T > img )
+	private void checkCalibration( final int[] dim, final float[] calibration, final ImgPlus< ? > img )
 	{
 		int skipDim = 0;
 		for ( int d = 0; d < calibration.length; d++ )
