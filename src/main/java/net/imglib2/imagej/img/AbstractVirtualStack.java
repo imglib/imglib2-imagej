@@ -460,8 +460,8 @@ public abstract class AbstractVirtualStack extends VirtualStack
 		if ( bitDepth == 24 )
 			return arbgVoxelAccessAction( channel, isSetVoxels );
 		return isSetVoxels ?
-				(BiConsumer< RealType, FloatType >) ( a, b ) -> a.setReal( b.getRealFloat() ) :
-				(BiConsumer< RealType, FloatType >) ( a, b ) -> b.setReal( a.getRealFloat() );
+				(BiConsumer< RealType<?>, FloatType >) ( a, b ) -> a.setReal( b.getRealFloat() ) :
+				(BiConsumer< RealType<?>, FloatType >) ( a, b ) -> b.setReal( a.getRealFloat() );
 	}
 
 	private static BiConsumer<ARGBType, FloatType> arbgVoxelAccessAction( Integer channel, boolean isSetVoxel )

@@ -57,15 +57,15 @@ public class ImageJVirtualStackUnsignedShort extends ImageJVirtualStack< Unsigne
 	public static < T extends RealType< ? > > ImageJVirtualStackUnsignedShort wrap( final RandomAccessibleInterval< T > source )
 	{
 		final ImageJVirtualStackUnsignedShort result = new ImageJVirtualStackUnsignedShort( toUnsignedShort( source ) );
-		result.initMinMax( Util.getTypeFromInterval( source ) );
+		result.initMinMax( source.getType() );
 		return result;
 	}
 
 	private static < T extends RealType< ? > > RandomAccessibleInterval< UnsignedShortType > toUnsignedShort( RandomAccessibleInterval< T > source )
 	{
-		if( Util.getTypeFromInterval( source ) instanceof UnsignedShortType )
+		if( source.getType() instanceof UnsignedShortType )
 			return ( RandomAccessibleInterval< UnsignedShortType > ) source;
-		return Converters.convert( source, new ShortConverter( Util.getTypeFromInterval( source ) ) );
+		return Converters.convert( source, new ShortConverter( source.getType() ) );
 	}
 
 	public < S > ImageJVirtualStackUnsignedShort( final RandomAccessibleInterval< S > source, final Converter< ? super S, UnsignedShortType > converter )
@@ -76,7 +76,7 @@ public class ImageJVirtualStackUnsignedShort extends ImageJVirtualStack< Unsigne
 	public < S > ImageJVirtualStackUnsignedShort( final RandomAccessibleInterval< S > source, final Converter< ? super S, UnsignedShortType > converter, final ExecutorService service )
 	{
 		super( source, converter, new UnsignedShortType(), 16, service );
-		initMinMax( Util.getTypeFromInterval( source ) );
+		initMinMax( source.getType() );
 	}
 
 	private ImageJVirtualStackUnsignedShort( final RandomAccessibleInterval< UnsignedShortType > source )
@@ -88,9 +88,9 @@ public class ImageJVirtualStackUnsignedShort extends ImageJVirtualStack< Unsigne
 	{
 		int maxDisplay = ( 1 << 16 ) - 1;
 
-		if ( BitType.class.isInstance( s ) )
+		if (s instanceof BitType)
 			maxDisplay = 1;
-		else if ( Unsigned12BitType.class.isInstance( s ) )
+		else if (s instanceof Unsigned12BitType)
 			maxDisplay = 4095;
 
 		setMinAndMax( 0, maxDisplay );

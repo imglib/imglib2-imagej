@@ -49,12 +49,12 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.IntervalIndexer;
-import net.imglib2.util.Util;
 import net.imglib2.view.Views;
 
 import java.util.concurrent.ExecutorService;
@@ -113,7 +113,7 @@ public class ImageJVirtualStack< T extends NativeType< T > > extends AbstractVir
 		// if we were given an ExecutorService, use a multithreaded projector
 		assert source.numDimensions() > 1;
 		this.source = zeroMin( source );
-		this.type = Util.getTypeFromInterval( source );
+		this.type = source.getType();
 		this.higherSourceDimensions = initHigherDimensions( source );
 	}
 
@@ -204,7 +204,7 @@ public class ImageJVirtualStack< T extends NativeType< T > > extends AbstractVir
 		Img< T > img = ( Img< T > ) ImageProcessorUtils.createImg( pixels, getWidth(), getHeight() );
 		// NB: The use of Converter and Projector2D is a bit surprising.
 		// As the converter intentionally uses the first parameter a output.
-		project( index, img, (o, i) -> o.set( i ) );
+		project( index, img, Type::set);
 	}
 
 	@Override

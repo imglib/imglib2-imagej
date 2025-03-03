@@ -67,9 +67,9 @@ public class ImageJVirtualStackFloat extends ImageJVirtualStack< FloatType >
 
 	private static < T extends RealType< ? > > RandomAccessibleInterval<FloatType> toFloat( RandomAccessibleInterval<T> source )
 	{
-		if( Util.getTypeFromInterval(source) instanceof FloatType )
+		if( source.getType() instanceof FloatType )
 			return ( RandomAccessibleInterval< FloatType > ) source;
-		return Converters.convert( source, new ToFloatSamplerConverter( Util.getTypeFromInterval( source )));
+		return Converters.convert( source, new ToFloatSamplerConverter( source.getType()));
 	}
 
 	public < S > ImageJVirtualStackFloat( final RandomAccessibleInterval< S > source,

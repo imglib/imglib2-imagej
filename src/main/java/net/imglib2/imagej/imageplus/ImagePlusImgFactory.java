@@ -116,7 +116,7 @@ public class ImagePlusImgFactory< T extends NativeType< T > > extends PlanarImgF
 	@Override
 	public < S > ImgFactory< S > imgFactory( final S type ) throws IncompatibleTypeException
 	{
-		if ( NativeType.class.isInstance( type ) )
+		if (type instanceof NativeType)
 			return new ImagePlusImgFactory( ( NativeType ) type );
 		throw new IncompatibleTypeException( this, type.getClass().getCanonicalName() + " does not implement NativeType." );
 	}

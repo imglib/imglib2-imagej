@@ -110,7 +110,7 @@ class MultithreadedIterableIntervalProjector2D<A, B> extends IterableIntervalPro
 		max[dimX] = target.max( 0 );
 		max[dimY] = target.max( 1 );
 
-		final IterableInterval< A > ii = Views.iterable( Views.interval( source, new FinalInterval( min, max ) ) );
+		final IterableInterval< A > ii = Views.interval( source, new FinalInterval( min, max ) );
 
 		final long portionSize = target.size() / nTasks;
 
@@ -119,92 +119,86 @@ class MultithreadedIterableIntervalProjector2D<A, B> extends IterableIntervalPro
 
 		for ( int t = 0; t < nTasks; ++t )
 		{
-			tasks.add( new Callable< Void >()
-			{
+			tasks.add(() -> {
+                int i = ai.getAndIncrement();
 
-				@Override
-				public Void call() throws Exception
-				{
-					int i = ai.getAndIncrement();
+                final Cursor< B > targetCursor = target.localizingCursor();
 
-					final Cursor< B > targetCursor = target.localizingCursor();
+                // we might need either a cursor or a RandomAccess
+                final RandomAccess< A > sourceRandomAccess = source.randomAccess();
+                sourceRandomAccess.setPosition( position );
 
-					// we might need either a cursor or a RandomAccess
-					final RandomAccess< A > sourceRandomAccess = source.randomAccess();
-					sourceRandomAccess.setPosition( position );
+                final Cursor< A > sourceCursor = ii.cursor();
 
-					final Cursor< A > sourceCursor = ii.cursor();
+                // jump to correct starting point
+                targetCursor.jumpFwd( i * portionSize );
+                sourceCursor.jumpFwd( i * portionSize );
+                long stepsTaken = 0;
 
-					// jump to correct starting point
-					targetCursor.jumpFwd( i * portionSize );
-					sourceCursor.jumpFwd( i * portionSize );
-					long stepsTaken = 0;
+                if ( target.iterationOrder().equals( ii.iterationOrder() )
+                        && !( sourceCursor instanceof RandomAccessibleIntervalCursor ) )
+                {
+                    // either map a portion or (for the last portion) go
+                    // until the end
+                    while ( ( i != nTasks - 1 && stepsTaken < portionSize )
+                            || ( i == nTasks - 1 && targetCursor.hasNext() ) )
+                    {
+                        stepsTaken++;
+                        converter.convert( sourceCursor.next(), targetCursor.next() );
+                    }
+                }
 
-					if ( target.iterationOrder().equals( ii.iterationOrder() )
-							&& !( sourceCursor instanceof RandomAccessibleIntervalCursor ) )
-					{
-						// either map a portion or (for the last portion) go
-						// until the end
-						while ( ( i != nTasks - 1 && stepsTaken < portionSize )
-								|| ( i == nTasks - 1 && targetCursor.hasNext() ) )
-						{
-							stepsTaken++;
-							converter.convert( sourceCursor.next(), targetCursor.next() );
-						}
-					}
+                else if ( target.iterationOrder() instanceof FlatIterationOrder )
+                {
 
-					else if ( target.iterationOrder() instanceof FlatIterationOrder )
-					{
+                    final long cr = -target.dimension( 0 );
+                    final long width = target.dimension( 0 );
+                    final long height = target.dimension( 1 );
 
-						final long cr = -target.dimension( 0 );
-						final long width = target.dimension( 0 );
-						final long height = target.dimension( 1 );
+                    final long initX = ( i * portionSize ) % width;
+                    final long initY = ( i * portionSize ) / width;
+                    // either map a portion or (for the last portion) go
+                    // until the end
+                    final long endX = ( i == nTasks - 1 ) ? width : ( initX + ( i + 1 ) * portionSize ) % width;
+                    final long endY = ( i == nTasks - 1 ) ? height - 1
+                            : ( initX + ( i + 1 ) * portionSize ) / width;
 
-						final long initX = ( i * portionSize ) % width;
-						final long initY = ( i * portionSize ) / width;
-						// either map a portion or (for the last portion) go
-						// until the end
-						final long endX = ( i == nTasks - 1 ) ? width : ( initX + ( i + 1 ) * portionSize ) % width;
-						final long endY = ( i == nTasks - 1 ) ? height - 1
-								: ( initX + ( i + 1 ) * portionSize ) / width;
+                    sourceRandomAccess.setPosition( initX, dimX );
+                    sourceRandomAccess.setPosition( initY, dimY );
 
-						sourceRandomAccess.setPosition( initX, dimX );
-						sourceRandomAccess.setPosition( initY, dimY );
+                    for ( long y = initY; y <= endY; ++y )
+                    {
+                        for ( long x = ( y == initY ? initX : 0 ); x < ( y == endY ? endX : width ); ++x )
+                        {
+                            targetCursor.fwd();
+                            converter.convert( sourceRandomAccess.get(), targetCursor.get() );
+                            sourceRandomAccess.fwd( dimX );
 
-						for ( long y = initY; y <= endY; ++y )
-						{
-							for ( long x = ( y == initY ? initX : 0 ); x < ( y == endY ? endX : width ); ++x )
-							{
-								targetCursor.fwd();
-								converter.convert( sourceRandomAccess.get(), targetCursor.get() );
-								sourceRandomAccess.fwd( dimX );
+                        }
+                        sourceRandomAccess.move( cr, dimX );
+                        sourceRandomAccess.fwd( dimY );
+                    }
+                }
 
-							}
-							sourceRandomAccess.move( cr, dimX );
-							sourceRandomAccess.fwd( dimY );
-						}
-					}
+                else
+                {
+                    // either map a portion or (for the last portion) go
+                    // until the end
+                    while ( ( i != nTasks - 1 && stepsTaken < portionSize )
+                            || ( i == nTasks - 1 && targetCursor.hasNext() ) )
+                    {
+                        stepsTaken++;
 
-					else
-					{
-						// either map a portion or (for the last portion) go
-						// until the end
-						while ( ( i != nTasks - 1 && stepsTaken < portionSize )
-								|| ( i == nTasks - 1 && targetCursor.hasNext() ) )
-						{
-							stepsTaken++;
+                        final B b = targetCursor.next();
+                        sourceRandomAccess.setPosition( targetCursor.getLongPosition( 0 ), dimX );
+                        sourceRandomAccess.setPosition( targetCursor.getLongPosition( 1 ), dimY );
 
-							final B b = targetCursor.next();
-							sourceRandomAccess.setPosition( targetCursor.getLongPosition( 0 ), dimX );
-							sourceRandomAccess.setPosition( targetCursor.getLongPosition( 1 ), dimY );
+                        converter.convert( sourceRandomAccess.get(), b );
+                    }
+                }
 
-							converter.convert( sourceRandomAccess.get(), b );
-						}
-					}
-
-					return null;
-				}
-			} );
+                return null;
+            });
 		}
 
 		try
