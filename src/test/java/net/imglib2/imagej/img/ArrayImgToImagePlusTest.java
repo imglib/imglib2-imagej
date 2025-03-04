@@ -34,24 +34,18 @@
 
 package net.imglib2.imagej.img;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
+import ij.ImagePlus;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.img.cell.CellImg;
+import net.imglib2.img.basictypeaccess.array.ByteArray;
+import net.imglib2.img.basictypeaccess.array.FloatArray;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
-
 import org.junit.Test;
 
-import ij.ImagePlus;
+import static org.junit.Assert.*;
 
 public class ArrayImgToImagePlusTest
 {
@@ -61,8 +55,8 @@ public class ArrayImgToImagePlusTest
 		final int width = 2;
 		final int height = 3;
 		final byte[] buffer = new byte[ width * height ];
-		final ImgPlus< UnsignedByteType > img = new ImgPlus<>( ArrayImgs.unsignedBytes( buffer, width, height ) );
-		final ImagePlus imagePlus = ArrayImgToImagePlus.wrap( img );
+		final ArrayImg< UnsignedByteType, ByteArray > img = ArrayImgs.unsignedBytes( buffer, width, height );
+		final ImagePlus imagePlus = ArrayImgToImagePlus.wrap( img, "test" );
 		assertEquals( width, imagePlus.getWidth() );
 		assertEquals( height, imagePlus.getHeight() );
 		assertSame( buffer, imagePlus.getProcessor().getPixels() );
@@ -71,13 +65,12 @@ public class ArrayImgToImagePlusTest
 	@Test
 	public void testIsSupported()
 	{
-		final ImgPlus< UnsignedByteType > supported = new ImgPlus<>( ArrayImgs.unsignedBytes( 2, 2 ), "image", new AxisType[] { Axes.X, Axes.Y } );
-		final ImgPlus< UnsignedByteType > unsupported1 = new ImgPlus<>( ArrayImgs.unsignedBytes( 2, 2, 3 ), "image", new AxisType[] { Axes.X, Axes.Y, Axes.Z } );
-		final CellImg< UnsignedByteType, ? > cellImg = new CellImgFactory<>( new UnsignedByteType() ).create( 2, 2 );
-		final ImgPlus< UnsignedByteType > unsupported2 = new ImgPlus<>( cellImg, "image", new AxisType[] { Axes.X, Axes.Y } );
+		final Img< UnsignedByteType > supported = ArrayImgs.unsignedBytes( 2, 2 );
+		final Img< UnsignedByteType > unsupported1 = ArrayImgs.unsignedBytes( 2, 2, 3 );
+		final Img< UnsignedByteType > cellImg = new CellImgFactory<>( new UnsignedByteType() ).create( 2, 2 );
 		assertTrue( ArrayImgToImagePlus.isSupported( supported ) );
 		assertFalse( ArrayImgToImagePlus.isSupported( unsupported1 ) );
-		assertFalse( ArrayImgToImagePlus.isSupported( unsupported2 ) );
+		assertFalse( ArrayImgToImagePlus.isSupported( cellImg ) );
 	}
 
 	@Test
@@ -85,9 +78,8 @@ public class ArrayImgToImagePlusTest
 	{
 		// setup
 		final float expected = 42.0f;
-		final Img< FloatType > img = ArrayImgs.floats( 1, 1 );
-		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y } );
-		final ImagePlus imagePlus = ArrayImgToImagePlus.wrap( imgPlus );
+		final ArrayImg<FloatType, FloatArray> img = ArrayImgs.floats( 1, 1 );
+		final ImagePlus imagePlus = ArrayImgToImagePlus.wrap( img, "title" );
 		// process
 		imagePlus.getProcessor().setf( 0, 0, expected );
 		// test

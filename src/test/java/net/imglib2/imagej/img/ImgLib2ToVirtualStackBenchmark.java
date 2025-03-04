@@ -38,7 +38,9 @@ import net.imagej.axis.Axes;
 import net.imagej.axis.AxisType;
 import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
@@ -66,8 +68,8 @@ public class ImgLib2ToVirtualStackBenchmark
 	private final ImgPlus< UnsignedByteType > smallPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( smallDims ) );
 	private final ImgPlus< UnsignedByteType > cubicPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( cubicDims ) );
 	private final ImgPlus< UnsignedByteType > deepPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( deepDims ) );
-	private final ImgPlus< UnsignedByteType > small2dArrayImg = makeImgPlus( ArrayImgs.unsignedBytes( 10, 10 ) );
-	private final ImgPlus< UnsignedByteType > big2dArrayImg = makeImgPlus( ArrayImgs.unsignedBytes( 10000, 10000 ) );
+	private final ArrayImg< UnsignedByteType, ByteArray > small2dArrayImg = ArrayImgs.unsignedBytes( 10, 10 );
+	private final ArrayImg< UnsignedByteType, ByteArray> big2dArrayImg = ArrayImgs.unsignedBytes( 10000, 10000 );
 
 	@Benchmark
 	public void testSmallCellImg()
@@ -108,13 +110,13 @@ public class ImgLib2ToVirtualStackBenchmark
 	@Benchmark
 	public void testSmall2dArrayImg()
 	{
-		ArrayImgToImagePlus.wrap( small2dArrayImg );
+		ArrayImgToImagePlus.wrap( small2dArrayImg, "test" );
 	}
 
 	@Benchmark
 	public void testLarge2dArrayImg()
 	{
-		ArrayImgToImagePlus.wrap( big2dArrayImg );
+		ArrayImgToImagePlus.wrap( big2dArrayImg, "test" );
 	}
 
 	private ImgPlus< UnsignedByteType > makeImgPlus( final Img< UnsignedByteType > deepPlanarImg )
