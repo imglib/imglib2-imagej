@@ -38,8 +38,6 @@ import static junit.framework.TestCase.assertTrue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.imagej.imageplus.ImagePlusAdapter;
-import net.imglib2.imagej.imageplus.VirtualStackAdapter;
 import net.imglib2.img.Img;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.view.Views;
@@ -59,7 +57,7 @@ public class ImagePlusToImgLib2PerformanceTest
 	{
 		final AtomicInteger counter = new AtomicInteger();
 		final ImagePlus image = countingImagePlus( counter );
-		final Img< ? extends RealType< ? > > img = VirtualStackAdapter.wrapByte( image );
+		final Img< ? extends RealType< ? > > img = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
 		runFlatIteration( img );
 		assertTrue( counter.get() < 120 ); // don't call getProcessor too often
 	}
@@ -69,7 +67,7 @@ public class ImagePlusToImgLib2PerformanceTest
 	{
 		final AtomicInteger counter = new AtomicInteger();
 		final ImagePlus image = countingImagePlus( counter );
-		final Img< ? extends RealType< ? > > img = VirtualStackAdapter.wrapByte( image );
+		final Img< ? extends RealType< ? > > img = ImagePlusToImgPlus.wrapByte( image );
 		runFlatIteration( Views.permute( img, 0, 2 ) );
 		assertTrue( counter.get() < 120 ); // don't call getProcessor too often
 	}
@@ -79,7 +77,7 @@ public class ImagePlusToImgLib2PerformanceTest
 	{
 		final AtomicInteger counter = new AtomicInteger();
 		final ImagePlus image = countingImagePlus( counter );
-		final Img< ? extends RealType< ? > > img = ImagePlusAdapter.wrapByte( image );
+		final Img< ? extends RealType< ? > > img = net.imglib2.imagej.ImagePlusToImg.wrapByte( image );
 		runFlatIteration( Views.permute( img, 0, 2 ) );
 		assertTrue( counter.get() < 120 ); // don't call getProcessor too often
 	}

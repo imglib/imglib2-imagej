@@ -31,14 +31,19 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.imagej;
+package net.imglib2.imagej.img;
 
+import ij.ImageStack;
 import net.imagej.ImgPlus;
-import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgFactory;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.view.Views;
-
+import net.imglib2.type.numeric.integer.UnsignedShortType;
+import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.type.numeric.real.FloatType;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
 import org.openjdk.jmh.annotations.State;
@@ -48,90 +53,71 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
-import ij.ImagePlus;
-import ij.gui.NewImage;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 @State( Scope.Benchmark )
-public class ImagePlusToImgLib2Benchmark
+public class ImageJVirtualStackGetProcessorBenchmark
 {
-	private final ImagePlus small = NewImage.createByteImage( "deep", 10, 10, 10, NewImage.FILL_BLACK );
-	private final ImagePlus deep = NewImage.createByteImage( "deep", 10, 10, 1000000, NewImage.FILL_BLACK );
-	private final ImagePlus wide = NewImage.createByteImage( "deep", 1000, 1000, 1000, NewImage.FILL_BLACK );
-	private final ImagePlus imageForIteration = NewImage.createByteImage( "deep", 10, 10, 1000, NewImage.FILL_BLACK );
 
-	@Benchmark
-	public void wrapSmall()
-	{
-		net.imglib2.imagej.ImagePlusToImgPlus.wrap( small );
+	private final ConcurrentMap< Object, Img<?> > cache = new ConcurrentHashMap<>();
+
+	private < T extends NativeType<T> > Img< T > getImage(T type) {
+		return ( Img< T > ) cache.computeIfAbsent( type, ignore -> new ArrayImgFactory<>( type ).create( 200, 200, 200 ) );
 	}
 
 	@Benchmark
-	public void wrapDeep()
-	{
-		net.imglib2.imagej.ImagePlusToImgPlus.wrap( deep );
+	public void bytes() {
+		test( new UnsignedByteType() );
 	}
 
 	@Benchmark
-	public void wrapWide()
-	{
-		ImagePlusToImgPlus.wrap( wide );
+	public void shorts() {
+		test( new UnsignedShortType() );
 	}
 
 	@Benchmark
-	public void wrapSmallOld()
-	{
-		net.imglib2.imagej.ImagePlusToImg.wrap( small );
+	public void floats() {
+		test( new FloatType() );
 	}
 
 	@Benchmark
-	public void wrapDeepOld()
-	{
-		net.imglib2.imagej.ImagePlusToImg.wrap( deep );
+	public void doubles() {
+		test( new DoubleType() );
 	}
 
 	@Benchmark
-	public void wrapWideOld()
-	{
-		net.imglib2.imagej.ImagePlusToImg.wrap( wide );
-	}
-
-	private final ImgPlus< UnsignedByteType > wrapped = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( imageForIteration );
-	private final Img< UnsignedByteType > wrappedOld = net.imglib2.imagej.ImagePlusToImg.wrapByte( imageForIteration );
-
-	@Benchmark
-	public void iterateWrapped()
-	{
-		flatIterate( wrapped );
+	public void ints() {
+		test( new DoubleType() );
 	}
 
 	@Benchmark
-	public void iterateWrappedOld()
-	{
-		flatIterate( wrappedOld );
+	public void argbs() {
+		test( new ARGBType() );
 	}
 
 	@Benchmark
-	public void iteratePermutedWrapped()
-	{
-		flatIterate( Views.permute( wrapped, 0, 2 ) );
+	public void all() {
+		test( new UnsignedByteType() );
+		test( new UnsignedShortType() );
+		test( new FloatType() );
+		test( new ARGBType() );
 	}
 
-	@Benchmark
-	public void iteratePermutedWrappedOld()
+	private < T extends NativeType< T > > void test( T type )
 	{
-		flatIterate( Views.permute( wrappedOld, 0, 2 ) );
-	}
-
-	private < T > void flatIterate( final RandomAccessibleInterval< T > image )
-	{
-		for ( final T pixel : Views.flatIterable( image ) )
-			;
+		Img< T > image = getImage( type );
+		ImageStack stack = ImgPlusToImagePlus.wrap( new ImgPlus<>( image ) ).getStack();
+		for ( int i = 0; i < stack.getSize(); i++ )
+		{
+			stack.getProcessor( i + 1 );
+		}
 	}
 
 	public static void main( final String... args ) throws RunnerException
 	{
 		final Options opt = new OptionsBuilder()
-				.include( ImagePlusToImgLib2Benchmark.class.getSimpleName() )
+				.include( ImageJVirtualStackGetProcessorBenchmark.class.getSimpleName() )
 				.forks( 0 )
 				.warmupIterations( 4 )
 				.measurementIterations( 8 )

@@ -31,13 +31,17 @@
  * POSSIBILITY OF SUCH DAMAGE.
  * #L%
  */
-package net.imglib2.imagej;
+package net.imglib2.imagej.img;
 
 import net.imagej.ImgPlus;
-import net.imglib2.RandomAccessibleInterval;
+import net.imagej.axis.Axes;
+import net.imagej.axis.AxisType;
+import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.view.Views;
 
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Scope;
@@ -48,90 +52,86 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
-import ij.ImagePlus;
-import ij.gui.NewImage;
-
 @State( Scope.Benchmark )
-public class ImagePlusToImgLib2Benchmark
+public class ImgLib2ToVirtualStackBenchmark
 {
-	private final ImagePlus small = NewImage.createByteImage( "deep", 10, 10, 10, NewImage.FILL_BLACK );
-	private final ImagePlus deep = NewImage.createByteImage( "deep", 10, 10, 1000000, NewImage.FILL_BLACK );
-	private final ImagePlus wide = NewImage.createByteImage( "deep", 1000, 1000, 1000, NewImage.FILL_BLACK );
-	private final ImagePlus imageForIteration = NewImage.createByteImage( "deep", 10, 10, 1000, NewImage.FILL_BLACK );
+
+	long[] smallDims = { 10, 10, 10 };
+	long[] deepDims = { 10, 10, 1000000 };
+	long[] cubicDims = { 1000, 1000, 1000 };
+
+	private final ImgPlus< UnsignedByteType > smallCellImage = makeImgPlus( createCellImg( deepDims ) );
+	private final ImgPlus< UnsignedByteType > deepCellImage = makeImgPlus( createCellImg( deepDims ) );
+	private final ImgPlus< UnsignedByteType > cubicCellImage = makeImgPlus( createCellImg( cubicDims ) );
+	private final ImgPlus< UnsignedByteType > smallPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( smallDims ) );
+	private final ImgPlus< UnsignedByteType > cubicPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( cubicDims ) );
+	private final ImgPlus< UnsignedByteType > deepPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( deepDims ) );
+	private final ImgPlus< UnsignedByteType > small2dArrayImg = makeImgPlus( ArrayImgs.unsignedBytes( 10, 10 ) );
+	private final ImgPlus< UnsignedByteType > big2dArrayImg = makeImgPlus( ArrayImgs.unsignedBytes( 10000, 10000 ) );
 
 	@Benchmark
-	public void wrapSmall()
+	public void testSmallCellImg()
 	{
-		net.imglib2.imagej.ImagePlusToImgPlus.wrap( small );
+		ImgPlusToImagePlus.wrap( smallCellImage );
 	}
 
 	@Benchmark
-	public void wrapDeep()
+	public void testDeepCellImg()
 	{
-		net.imglib2.imagej.ImagePlusToImgPlus.wrap( deep );
+		ImgPlusToImagePlus.wrap( deepCellImage );
 	}
 
 	@Benchmark
-	public void wrapWide()
+	public void testCubicCellImg()
 	{
-		ImagePlusToImgPlus.wrap( wide );
+		ImgPlusToImagePlus.wrap( cubicCellImage );
 	}
 
 	@Benchmark
-	public void wrapSmallOld()
+	public void testSmallPlanarImg()
 	{
-		net.imglib2.imagej.ImagePlusToImg.wrap( small );
+		PlanarImgToImagePlus.wrap( smallPlanarImg );
 	}
 
 	@Benchmark
-	public void wrapDeepOld()
+	public void testCubicPlanarImg()
 	{
-		net.imglib2.imagej.ImagePlusToImg.wrap( deep );
+		PlanarImgToImagePlus.wrap( cubicPlanarImg );
 	}
 
 	@Benchmark
-	public void wrapWideOld()
+	public void testDeepPlanarImg()
 	{
-		net.imglib2.imagej.ImagePlusToImg.wrap( wide );
-	}
-
-	private final ImgPlus< UnsignedByteType > wrapped = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( imageForIteration );
-	private final Img< UnsignedByteType > wrappedOld = net.imglib2.imagej.ImagePlusToImg.wrapByte( imageForIteration );
-
-	@Benchmark
-	public void iterateWrapped()
-	{
-		flatIterate( wrapped );
+		PlanarImgToImagePlus.wrap( deepPlanarImg );
 	}
 
 	@Benchmark
-	public void iterateWrappedOld()
+	public void testSmall2dArrayImg()
 	{
-		flatIterate( wrappedOld );
+		ArrayImgToImagePlus.wrap( small2dArrayImg );
 	}
 
 	@Benchmark
-	public void iteratePermutedWrapped()
+	public void testLarge2dArrayImg()
 	{
-		flatIterate( Views.permute( wrapped, 0, 2 ) );
+		ArrayImgToImagePlus.wrap( big2dArrayImg );
 	}
 
-	@Benchmark
-	public void iteratePermutedWrappedOld()
+	private ImgPlus< UnsignedByteType > makeImgPlus( final Img< UnsignedByteType > deepPlanarImg )
 	{
-		flatIterate( Views.permute( wrappedOld, 0, 2 ) );
+		final AxisType[] axes = { Axes.X, Axes.Y, Axes.Z };
+		return new ImgPlus<>( deepPlanarImg, "title", axes );
 	}
 
-	private < T > void flatIterate( final RandomAccessibleInterval< T > image )
+	private Img< UnsignedByteType > createCellImg( final long... dim )
 	{
-		for ( final T pixel : Views.flatIterable( image ) )
-			;
+		return new CellImgFactory<>( new UnsignedByteType() ).create( dim );
 	}
 
 	public static void main( final String... args ) throws RunnerException
 	{
 		final Options opt = new OptionsBuilder()
-				.include( ImagePlusToImgLib2Benchmark.class.getSimpleName() )
+				.include( ImgLib2ToVirtualStackBenchmark.class.getSimpleName() )
 				.forks( 0 )
 				.warmupIterations( 4 )
 				.measurementIterations( 8 )
