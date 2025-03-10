@@ -35,7 +35,6 @@
 package net.imglib2.imagej.img;
 
 import ij.ImagePlus;
-import net.imagej.ImgPlus;
 import net.imglib2.Dimensions;
 import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
@@ -46,6 +45,7 @@ import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
 import net.imglib2.img.cell.CellGrid;
+import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.NativeType;
 import net.imglib2.type.NativeTypeFactory;
@@ -70,18 +70,23 @@ public class CellImgToImagePlus
 {
 
 	/**
-	 * Returns true if {@link #wrap(ImgPlus)} supports the given image.
+	 * Returns true, if {@link #wrap(CellImg, String)} supports the given image.
 	 */
-	public static boolean isSupported( ImgPlus< ? > imgPlus )
+	public static boolean isSupported( Object obj )
 	{
-		return isCellImgWithPlanarCells( imgPlus.getImg() ) &&
-				PlanarImgToImagePlus.isSupported( toPlanarImgPlus( imgPlus ) );
+		if (!(obj instanceof CellImg))
+			return false;
+		CellImg<?, ?> img = (CellImg<?, ?>) obj;
+		if (!(img.update(img.cursor()) instanceof ArrayDataAccess))
+			return false;
+		return isCellImgWithPlanarCells( img ) &&
+				PlanarImgToImagePlus.isSupported( toPlanarImgPlus( (CellImg<? extends NativeType, ? extends ArrayDataAccess>) img ) );
 	}
 
-	private static boolean isCellImgWithPlanarCells( Img< ? > imgPlus )
+	private static boolean isCellImgWithPlanarCells( Img< ? > img )
 	{
-		return ( imgPlus instanceof AbstractCellImg ) &&
-				areCellsPlanar( ( ( AbstractCellImg ) imgPlus ).getCellGrid() );
+		return ( img instanceof AbstractCellImg ) &&
+				areCellsPlanar( ( ( AbstractCellImg<?, ?, ?, ?> ) img ).getCellGrid() );
 	}
 
 	private static boolean areCellsPlanar( CellGrid cellGrid )
@@ -101,20 +106,12 @@ public class CellImgToImagePlus
 	 * UnsignedByte-, UnsignedShort-, ARGB- or FloatType. First two axes must be
 	 * X and Y (or unknown).
 	 */
-	public static ImagePlus wrap( ImgPlus< ? > imgPlus )
+	public static <T extends NativeType<T>, A extends ArrayDataAccess<A>> ImagePlus wrap( CellImg< T, A > img, String name )
 	{
-		return PlanarImgToImagePlus.wrap( toPlanarImgPlus( imgPlus ), imgPlus.getName() );
+		return PlanarImgToImagePlus.wrap( toPlanarImgPlus( img ), name );
 	}
 
-	private static < T > PlanarImg< ?, ? > toPlanarImgPlus( ImgPlus< T > image )
-	{
-		if ( !isCellImgWithPlanarCells( image.getImg() ) )
-			throw new IllegalArgumentException( "ERROR: Image must be a CellImg, with planar cells." );
-		return toPlanar( ( AbstractCellImg ) image.getImg() );
-	}
-
-	private static < T extends NativeType< T >, A extends ArrayDataAccess< A > > PlanarImg< ?, ? >
-	toPlanar( AbstractCellImg< T, A, ?, ? > cellImage )
+	private static < T extends NativeType<T>, A extends ArrayDataAccess<A>> PlanarImg< T, A > toPlanarImgPlus(CellImg< T, A > cellImage )
 	{
 		final long[] dim = Intervals.dimensionsAsLongArray( cellImage );
 		final T type = cellImage.getType().createVariable();

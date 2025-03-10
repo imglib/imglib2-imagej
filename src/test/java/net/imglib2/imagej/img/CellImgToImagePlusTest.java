@@ -35,13 +35,12 @@
 package net.imglib2.imagej.img;
 
 import ij.ImagePlus;
-import ij.ImageStack;
 import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
 import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
+import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.IntegerType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.DoubleType;
@@ -49,10 +48,7 @@ import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Tests {@link CellImgToImagePlus}.
@@ -62,77 +58,76 @@ public class CellImgToImagePlusTest
 
 	@Test
 	public void test3D() {
-		Img< UnsignedByteType > image = new CellImgFactory<>( new UnsignedByteType(), 3, 1, 1 ).create( 3, 1, 2 );
+		CellImg< UnsignedByteType, ? > image = new CellImgFactory<>( new UnsignedByteType(), 3, 1, 1 ).create( 3, 1, 2 );
 		fill( image );
-		ImageStack stack = wrap( image );
-		assertArrayEquals( new byte[]{ 1, 2, 3 }, (byte[]) stack.getPixels( 1 ) );
-		assertArrayEquals( new byte[]{ 4, 5, 6 }, (byte[]) stack.getPixels( 2 ) );
+		ImagePlus imp = wrap( image );
+		assertArrayEquals( new byte[]{ 1, 2, 3 }, (byte[]) imp.getStack().getPixels( 1 ) );
+		assertArrayEquals( new byte[]{ 4, 5, 6 }, (byte[]) imp.getStack().getPixels( 2 ) );
 	}
 
-	private ImageStack wrap( Img< ? > image )
+	private static <T extends NativeType<T>, A extends ArrayDataAccess<A>> ImagePlus wrap(CellImg< T, ?> image )
 	{
-		return CellImgToImagePlus.wrap( ImgPlus.wrap( image ) ).getStack();
+		return CellImgToImagePlus.wrap( (CellImg<T, ? extends ArrayDataAccess>) image, "title" );
 	}
 
 	@Test
 	public void test5D() {
-		Img< UnsignedByteType > image = new CellImgFactory<>( new UnsignedByteType(), 2, 1, 1, 1, 1 ).create( 2, 1, 2, 3, 4 );
+		CellImg< UnsignedByteType, ? > image = new CellImgFactory<>( new UnsignedByteType(), 2, 1, 1, 1, 1 ).create( 2, 1, 2, 3, 4 );
 		fill( image );
-		ImageStack stack = wrap( image );
-		assertArrayEquals( new byte[]{ 1, 2 }, (byte[]) stack.getPixels( 1 ) );
-		assertArrayEquals( new byte[]{ 3, 4 }, (byte[]) stack.getPixels( 2 ) );
-		assertArrayEquals( new byte[]{ 5, 6 }, (byte[]) stack.getPixels( 3 ) );
+		ImagePlus imp = wrap( image );
+		assertArrayEquals( new byte[]{ 1, 2 }, (byte[]) imp.getStack().getPixels( 1 ) );
+		assertArrayEquals( new byte[]{ 3, 4 }, (byte[]) imp.getStack().getPixels( 2 ) );
+		assertArrayEquals( new byte[]{ 5, 6 }, (byte[]) imp.getStack().getPixels( 3 ) );
 	}
 
 	@Test
 	public void testFloatImg() {
-		Img< FloatType > image = new CellImgFactory<>( new FloatType(), 1, 1, 1 ).create( 1, 1, 1 );
+		CellImg< FloatType, ? > image = new CellImgFactory<>( new FloatType(), 1, 1, 1 ).create( 1, 1, 1 );
 		image.firstElement().set( 42 );
-		ImageStack stack = wrap( image );
-		assertArrayEquals( new float[]{ 42 }, (float[]) stack.getPixels( 1 ), 0 );
+		ImagePlus imp = wrap( image );
+		assertArrayEquals( new float[]{ 42 }, (float[]) imp.getStack().getPixels( 1 ), 0 );
 	}
 
 	@Test
 	public void testAxisOrder()
 	{
-		final Img< UnsignedByteType > img = new CellImgFactory<>( new UnsignedByteType(), 1, 1, 1, 1, 1).create( new long[] { 1, 1, 2, 3, 4 } );
+		final CellImg< UnsignedByteType, ? > img = new CellImgFactory<>( new UnsignedByteType(), 1, 1, 1, 1, 1).create( new long[] { 1, 1, 2, 3, 4 } );
 		fill( img );
-		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
-		final ImagePlus imagePlus = CellImgToImagePlus.wrap( imgPlus );
-		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
-		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
-		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
+		final ImagePlus imp = wrap(img);
+		assertEquals( 7, imp.getStack().getProcessor( imp.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
+		assertEquals( 3, imp.getStack().getProcessor( imp.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
+		assertEquals( 2, imp.getStack().getProcessor( imp.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
 	}
 
 	@Test
 	public void testIsSupported()
 	{
-		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new UnsignedByteType(), 2, 2 ).create( 2, 2 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( new CellImgFactory<>( new UnsignedByteType(), 2, 2 ).create( 2, 2 ) ) );
 	}
 
 	@Test
 	public void testIsSupported_FloatType()
 	{
-		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2 ).create( 2, 2 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( new CellImgFactory<>( new FloatType(), 2, 2 ).create( 2, 2 ) ) );
 	}
 
 	@Test
 	public void testIsSupported_UnsupportedType()
 	{
-		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new DoubleType(), 2, 2 ).create( 2, 2 ) ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( new CellImgFactory<>( new DoubleType(), 2, 2 ).create( 2, 2 ) ) );
 	}
 
 	@Test
 	public void testIsSupported_PlanarCells()
 	{
-		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 7, 2 ).create( 2, 2 ) ) ) );
-		assertTrue( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 1 ) ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( new CellImgFactory<>( new FloatType(), 7, 2 ).create( 2, 2 ) ) );
+		assertTrue( CellImgToImagePlus.isSupported( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 1 ) ) );
 	}
 
 	@Test
 	public void testIsSupported_NoPlanarCells() {
-		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 1, 2 ).create( 2, 2 ) ) ) );
-		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 3 ) ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( new CellImgFactory<>( new FloatType(), 1, 2 ).create( 2, 2 ) ) );
+		assertFalse( CellImgToImagePlus.isSupported( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 3 ) ) );
 	}
 
 	private void fill( RandomAccessibleInterval< ? extends IntegerType< ? > > image )
@@ -146,8 +141,8 @@ public class CellImgToImagePlusTest
 	public void testPersistence()
 	{
 		// setup
-		final Img< FloatType > img = new CellImgFactory<>( new FloatType() ).create( 1, 1, 1 );
-		final ImagePlus imagePlus = CellImgToImagePlus.wrap( ImgPlus.wrap( img ) );
+		final CellImg< FloatType, ? > img = new CellImgFactory<>( new FloatType() ).create( 1, 1, 1 );
+		final ImagePlus imagePlus = wrap( img );
 		final float expected = 42.0f;
 		// process
 		imagePlus.getProcessor().setf( 0, 0, expected );
@@ -158,8 +153,8 @@ public class CellImgToImagePlusTest
 	@Test
 	public void testSetPixels() {
 		// setup
-		final Img< FloatType > img = new CellImgFactory<>( new FloatType() ).create( 1, 1, 1 );
-		final ImagePlus imagePlus = CellImgToImagePlus.wrap( new ImgPlus<>( img, "title" ) );
+		final CellImg< FloatType, ? > img = new CellImgFactory<>( new FloatType() ).create( 1, 1, 1 );
+		final ImagePlus imagePlus = wrap( img );
 		final float expected = 42.0f;
 		// process
 		imagePlus.getStack().setPixels( new float[] { expected }, 1 );
