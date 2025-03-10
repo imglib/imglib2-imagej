@@ -42,6 +42,7 @@ import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.ByteArray;
 import net.imglib2.img.cell.CellImgFactory;
+import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 
@@ -65,9 +66,9 @@ public class ImgLib2ToVirtualStackBenchmark
 	private final ImgPlus< UnsignedByteType > smallCellImage = makeImgPlus( createCellImg( deepDims ) );
 	private final ImgPlus< UnsignedByteType > deepCellImage = makeImgPlus( createCellImg( deepDims ) );
 	private final ImgPlus< UnsignedByteType > cubicCellImage = makeImgPlus( createCellImg( cubicDims ) );
-	private final ImgPlus< UnsignedByteType > smallPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( smallDims ) );
-	private final ImgPlus< UnsignedByteType > cubicPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( cubicDims ) );
-	private final ImgPlus< UnsignedByteType > deepPlanarImg = makeImgPlus( PlanarImgs.unsignedBytes( deepDims ) );
+	private final PlanarImg< UnsignedByteType, ByteArray > smallPlanarImg = PlanarImgs.unsignedBytes( smallDims );
+	private final PlanarImg< UnsignedByteType, ByteArray > cubicPlanarImg = PlanarImgs.unsignedBytes( cubicDims );
+	private final PlanarImg< UnsignedByteType, ByteArray > deepPlanarImg = PlanarImgs.unsignedBytes( deepDims );
 	private final ArrayImg< UnsignedByteType, ByteArray > small2dArrayImg = ArrayImgs.unsignedBytes( 10, 10 );
 	private final ArrayImg< UnsignedByteType, ByteArray> big2dArrayImg = ArrayImgs.unsignedBytes( 10000, 10000 );
 
@@ -92,19 +93,19 @@ public class ImgLib2ToVirtualStackBenchmark
 	@Benchmark
 	public void testSmallPlanarImg()
 	{
-		PlanarImgToImagePlus.wrap( smallPlanarImg );
+		PlanarImgToImagePlus.wrap( smallPlanarImg, "test" );
 	}
 
 	@Benchmark
 	public void testCubicPlanarImg()
 	{
-		PlanarImgToImagePlus.wrap( cubicPlanarImg );
+		PlanarImgToImagePlus.wrap( cubicPlanarImg, "test" );
 	}
 
 	@Benchmark
 	public void testDeepPlanarImg()
 	{
-		PlanarImgToImagePlus.wrap( deepPlanarImg );
+		PlanarImgToImagePlus.wrap( deepPlanarImg, "test" );
 	}
 
 	@Benchmark

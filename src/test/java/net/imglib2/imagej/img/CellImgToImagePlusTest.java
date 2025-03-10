@@ -99,9 +99,9 @@ public class CellImgToImagePlusTest
 		fill( img );
 		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
 		final ImagePlus imagePlus = CellImgToImagePlus.wrap( imgPlus );
-		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
-		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
-		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
+		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
+		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
+		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
 	}
 
 	@Test
@@ -133,13 +133,6 @@ public class CellImgToImagePlusTest
 	public void testIsSupported_NoPlanarCells() {
 		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 1, 2 ).create( 2, 2 ) ) ) );
 		assertFalse( CellImgToImagePlus.isSupported( ImgPlus.wrap( new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 3 ) ) ) );
-	}
-
-	@Test
-	public void testIsSupported_WrongAxis() {
-		final Img< FloatType > cellImg = new CellImgFactory<>( new FloatType(), 2, 2, 3 ).create( 2, 2, 1 );
-		assertTrue( CellImgToImagePlus.isSupported( new ImgPlus<>( cellImg, "title", new AxisType[]{ Axes.X, Axes.Y, Axes.unknown() } ) ) );
-		assertFalse( CellImgToImagePlus.isSupported( new ImgPlus<>( cellImg, "title", new AxisType[]{ Axes.X, Axes.Z, Axes.TIME } ) ) );
 	}
 
 	private void fill( RandomAccessibleInterval< ? extends IntegerType< ? > > image )

@@ -103,14 +103,14 @@ public class CellImgToImagePlus
 	 */
 	public static ImagePlus wrap( ImgPlus< ? > imgPlus )
 	{
-		return PlanarImgToImagePlus.wrap( toPlanarImgPlus( imgPlus ) );
+		return PlanarImgToImagePlus.wrap( toPlanarImgPlus( imgPlus ), imgPlus.getName() );
 	}
 
-	private static < T > ImgPlus< T > toPlanarImgPlus( ImgPlus< T > image )
+	private static < T > PlanarImg< ?, ? > toPlanarImgPlus( ImgPlus< T > image )
 	{
 		if ( !isCellImgWithPlanarCells( image.getImg() ) )
 			throw new IllegalArgumentException( "ERROR: Image must be a CellImg, with planar cells." );
-		return new ImgPlus< T >( toPlanar( ( AbstractCellImg ) image.getImg() ), image );
+		return toPlanar( ( AbstractCellImg ) image.getImg() );
 	}
 
 	private static < T extends NativeType< T >, A extends ArrayDataAccess< A > > PlanarImg< ?, ? >
