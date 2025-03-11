@@ -37,7 +37,6 @@ package net.imglib2.imagej.img;
 import ij.ImagePlus;
 import ij.VirtualStack;
 import net.imglib2.Interval;
-import net.imglib2.imagej.ImgPlusToImagePlus;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
 import net.imglib2.img.basictypeaccess.array.*;
 import net.imglib2.img.planar.PlanarImg;
@@ -48,7 +47,6 @@ import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
 
-import java.awt.*;
 import java.util.function.IntUnaryOperator;
 import java.util.stream.IntStream;
 

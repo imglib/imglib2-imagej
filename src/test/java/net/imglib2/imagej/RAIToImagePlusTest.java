@@ -34,106 +34,56 @@
 
 package net.imglib2.imagej;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.FinalInterval;
-import net.imglib2.RandomAccessibleInterval;
-import net.imglib2.img.Img;
-import net.imglib2.img.ImgView;
-import net.imglib2.img.array.ArrayImgs;
-import net.imglib2.type.logic.BitType;
-import net.imglib2.type.logic.BoolType;
-import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.RealType;
-import net.imglib2.type.numeric.integer.ByteType;
-import net.imglib2.type.numeric.integer.IntType;
-import net.imglib2.type.numeric.integer.LongType;
-import net.imglib2.type.numeric.integer.ShortType;
-import net.imglib2.type.numeric.integer.Unsigned128BitType;
-import net.imglib2.type.numeric.integer.Unsigned12BitType;
-import net.imglib2.type.numeric.integer.Unsigned2BitType;
-import net.imglib2.type.numeric.integer.Unsigned4BitType;
-import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.type.numeric.integer.UnsignedIntType;
-import net.imglib2.type.numeric.integer.UnsignedLongType;
-import net.imglib2.type.numeric.integer.UnsignedShortType;
-import net.imglib2.type.numeric.real.DoubleType;
-import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.ConstantUtils;
-import net.imglib2.view.Views;
-
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-
 import ij.ImagePlus;
 import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
+import net.imglib2.FinalInterval;
+import net.imglib2.RandomAccessibleInterval;
+import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImgs;
+import net.imglib2.type.logic.BitType;
+import net.imglib2.type.logic.BoolType;
+import net.imglib2.type.numeric.IntegerType;
+import net.imglib2.type.numeric.RealType;
+import net.imglib2.type.numeric.integer.*;
+import net.imglib2.type.numeric.real.DoubleType;
+import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.ConstantUtils;
+import net.imglib2.view.Views;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.*;
 
-public class ImgPlusToImagePlusTest
+public class RAIToImagePlusTest
 {
 	@Test
 	public void testAxisOrder()
 	{
 		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 1, 1, 2, 3, 4 );
 		fill( img );
-		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
-		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
-		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
-		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
-	}
-
-	@Test
-	public void test1DStack()
-	{
-		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 2, 2 );
-		fill( img );
-		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.TIME, Axes.X } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
-		assertArrayEquals( new byte[] { 1, 3 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 1 ) ) );
-		assertArrayEquals( new byte[] { 2, 4 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 2 ) ) );
-	}
-
-	@Test
-	public void testNoXY()
-	{
-		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 2, 2 );
-		fill( img );
-		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.TIME, Axes.CHANNEL } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
-		assertArrayEquals( new byte[] { 2 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 2 ) ) );
-		assertArrayEquals( new byte[] { 3 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 2, 1, 1 ) ) );
-	}
-
-	@Ignore( "not supporting more than five dimensions yet" )
-	@Test
-	public void test6d()
-	{
-		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 2, 2, 2, 2, 2, 2 );
-		fill( img );
-		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.Z, Axes.CHANNEL, Axes.TIME, Axes.CHANNEL } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, true );
-		assertArrayEquals( new byte[] { 2 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 1, 1, 2 ) ) );
-		assertArrayEquals( new byte[] { 3 }, ( byte[] ) imagePlus.getStack().getPixels( imagePlus.getStackIndex( 2, 1, 1 ) ) );
+		final ImagePlus imagePlus = RAIToImagePlus.wrap( img, "title" );
+		assertEquals( 7, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
+		assertEquals( 3, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
+		assertEquals( 2, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 2, 1, 1 ) ).get( 0, 0 ) );
 	}
 
 	@Test
 	public void testColoredAxisOrder()
 	{
-		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 1, 1, 2, 3, 4 );
+		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( 1, 1, 3, 2, 4 );
 		fill( img );
-		final ImgPlus< UnsignedByteType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y, Axes.TIME, Axes.CHANNEL, Axes.Z } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, true );
-		assertEquals( 0xff020406, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
-		assertEquals( 0xff07090b, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
+		final ImagePlus imagePlus = RAIToImagePlus.convertRGB( img, "title" );
+		// img[0, 0, :, 0, 0] is [1, 2, 3]
+		assertEquals( 0xff010203, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 1 ) ).get( 0, 0 ) );
+		// img[0, 0, :, 1, 0] is [4, 5, 6]
+		assertEquals( 0xff040506, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 2, 1 ) ).get( 0, 0 ) );
+		// img[0, 0, :, 0, 1] is [7, 8, 9]
+		assertEquals( 0xff070809, imagePlus.getStack().getProcessor( imagePlus.getStackIndex( 1, 1, 2 ) ).get( 0, 0 ) );
 	}
 
 	@Test
@@ -235,10 +185,8 @@ public class ImgPlusToImagePlusTest
 	private < T extends RealType< T > > void testTypeConversion( final Class< ? extends ImageProcessor > processorClass, final float expected, final T input )
 	{
 		final RandomAccessibleInterval< T > rai = ConstantUtils.constantRandomAccessibleInterval( input, new FinalInterval( 1, 1 ) );
-		final Img< T > image = ImgView.wrap( rai, null );
-		final ImgPlus< T > imgPlus = new ImgPlus< T >( image, "title", new AxisType[] { Axes.X, Axes.Y } );
 		// process
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		final ImagePlus imagePlus = RAIToImagePlus.wrap( rai, "title" );
 		// test
 		final ImageProcessor processor = imagePlus.getProcessor();
 		Assert.assertTrue( processorClass.isInstance( processor ) );
@@ -256,10 +204,9 @@ public class ImgPlusToImagePlusTest
 	{
 		final byte[] array = { 1, 2, 3, 4, 5, 6 };
 		final Img< UnsignedByteType > img = ArrayImgs.unsignedBytes( array, 1, 1, 2, 3 );
-		final AxisType[] axes = { Axes.unknown(), Axes.unknown(), Axes.TIME, Axes.unknown() };
-		final ImagePlus result = ImgPlusToImagePlus.wrap( new ImgPlus<>( img, "title", axes ), false );
-		assertEquals( 3, result.getNChannels() );
-		assertEquals( 2, result.getNFrames() );
+		final ImagePlus result = RAIToImagePlus.wrap( img, "title" );
+		assertEquals( 2, result.getNChannels() );
+		assertEquals( 3, result.getNSlices() );
 	}
 
 	@Test
@@ -267,8 +214,7 @@ public class ImgPlusToImagePlusTest
 	{
 		// setup
 		final Img< FloatType > img = ArrayImgs.floats( 1, 1 );
-		final ImgPlus< FloatType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrap( imgPlus, false );
+		final ImagePlus imagePlus = RAIToImagePlus.wrap( img, "title" );
 		final float expected = 42;
 		// process
 		final ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
@@ -287,8 +233,7 @@ public class ImgPlusToImagePlusTest
 	{
 		// setup
 		final Img< BitType > img = ArrayImgs.bits( 1, 1 );
-		final ImgPlus< BitType > imgPlus = new ImgPlus<>( img, "title", new AxisType[] { Axes.X, Axes.Y } );
-		final ImagePlus imagePlus = ImgPlusToImagePlus.wrapAndScaleBitType( imgPlus );
+		final ImagePlus imagePlus = RAIToImagePlus.wrapAndScaleBit( img, "test" );
 		// process
 		final ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
 		processor.setf( 0, 0, 255 );

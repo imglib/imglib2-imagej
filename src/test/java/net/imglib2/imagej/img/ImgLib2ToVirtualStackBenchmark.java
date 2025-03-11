@@ -33,14 +33,11 @@
  */
 package net.imglib2.imagej.img;
 
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imglib2.imagej.ImgPlusToImagePlus;
-import net.imglib2.img.Img;
+import net.imglib2.imagej.RAIToImagePlus;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.array.ArrayImgs;
 import net.imglib2.img.basictypeaccess.array.ByteArray;
+import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.cell.CellImgFactory;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.img.planar.PlanarImgs;
@@ -63,9 +60,10 @@ public class ImgLib2ToVirtualStackBenchmark
 	long[] deepDims = { 10, 10, 1000000 };
 	long[] cubicDims = { 1000, 1000, 1000 };
 
-	private final ImgPlus< UnsignedByteType > smallCellImage = makeImgPlus( createCellImg( deepDims ) );
-	private final ImgPlus< UnsignedByteType > deepCellImage = makeImgPlus( createCellImg( deepDims ) );
-	private final ImgPlus< UnsignedByteType > cubicCellImage = makeImgPlus( createCellImg( cubicDims ) );
+	private final CellImgFactory<UnsignedByteType> fac = new CellImgFactory<>( new UnsignedByteType() );
+	private final CellImg< UnsignedByteType, ? > smallCellImage = fac.create( smallDims );
+	private final CellImg< UnsignedByteType, ? > deepCellImage = fac.create( deepDims );
+	private final CellImg< UnsignedByteType, ? > cubicCellImage = fac.create( cubicDims );
 	private final PlanarImg< UnsignedByteType, ByteArray > smallPlanarImg = PlanarImgs.unsignedBytes( smallDims );
 	private final PlanarImg< UnsignedByteType, ByteArray > cubicPlanarImg = PlanarImgs.unsignedBytes( cubicDims );
 	private final PlanarImg< UnsignedByteType, ByteArray > deepPlanarImg = PlanarImgs.unsignedBytes( deepDims );
@@ -75,19 +73,19 @@ public class ImgLib2ToVirtualStackBenchmark
 	@Benchmark
 	public void testSmallCellImg()
 	{
-		ImgPlusToImagePlus.wrap( smallCellImage );
+		RAIToImagePlus.wrap( smallCellImage, "test" );
 	}
 
 	@Benchmark
 	public void testDeepCellImg()
 	{
-		ImgPlusToImagePlus.wrap( deepCellImage );
+		RAIToImagePlus.wrap(deepCellImage, "test" );
 	}
 
 	@Benchmark
 	public void testCubicCellImg()
 	{
-		ImgPlusToImagePlus.wrap( cubicCellImage );
+		RAIToImagePlus.wrap(cubicCellImage, "test" );
 	}
 
 	@Benchmark
@@ -118,17 +116,6 @@ public class ImgLib2ToVirtualStackBenchmark
 	public void testLarge2dArrayImg()
 	{
 		ArrayImgToImagePlus.wrap( big2dArrayImg, "test" );
-	}
-
-	private ImgPlus< UnsignedByteType > makeImgPlus( final Img< UnsignedByteType > deepPlanarImg )
-	{
-		final AxisType[] axes = { Axes.X, Axes.Y, Axes.Z };
-		return new ImgPlus<>( deepPlanarImg, "title", axes );
-	}
-
-	private Img< UnsignedByteType > createCellImg( final long... dim )
-	{
-		return new CellImgFactory<>( new UnsignedByteType() ).create( dim );
 	}
 
 	public static void main( final String... args ) throws RunnerException
