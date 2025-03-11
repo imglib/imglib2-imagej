@@ -12,6 +12,7 @@ import net.imglib2.converter.readwrite.SamplerConverter;
 import net.imglib2.imagej.img.*;
 import net.imglib2.img.basictypeaccess.IntAccess;
 import net.imglib2.type.BooleanType;
+import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.*;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -22,6 +23,7 @@ import net.imglib2.view.composite.Composite;
 import net.imglib2.view.composite.GenericComposite;
 
 import java.util.concurrent.ExecutorService;
+import java.util.function.Function;
 
 /**
  * Utilities for <b>wrapping</b> {@link RandomAccessibleInterval}s
@@ -118,12 +120,12 @@ public class RAIToImagePlus {
             final String title,
             final ExecutorService service )
     {
-        final ImageJVirtualStackFloat stack = ImageJVirtualStackFloat.wrap( img );
-        stack.setExecutorService( service );
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+                img, //
+                ImageJVirtualStackFloat::wrap, //
+                title, //
+                service //
+        );
     }
 
     /**
@@ -159,11 +161,12 @@ public class RAIToImagePlus {
             final String title,
             final ExecutorService service )
     {
-        final ImageJVirtualStackFloat stack = new ImageJVirtualStackFloat( img, converter, service );
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+                img, //
+                rai -> new ImageJVirtualStackFloat(rai, converter, service), //
+                title, //
+                service //
+        );
     }
 
     /**
@@ -196,12 +199,12 @@ public class RAIToImagePlus {
     public static ImagePlus wrapRGB( final RandomAccessibleInterval< ARGBType > img, final String title,
                                      final ExecutorService service)
     {
-        final ImageJVirtualStackARGB stack = ImageJVirtualStackARGB.wrap( img );
-        stack.setExecutorService(service);
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+                img, //
+                ImageJVirtualStackARGB::wrap, //
+                title, //
+                service //
+        );
     }
 
     /**
@@ -262,12 +265,12 @@ public class RAIToImagePlus {
             final String title,
             final ExecutorService service )
     {
-        final ImageJVirtualStackUnsignedByte stack = ImageJVirtualStackUnsignedByte.wrap( img );
-        stack.setExecutorService( service );
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+                img, //
+                ImageJVirtualStackUnsignedByte::wrap, //
+                title, //
+                service //
+        );
     }
 
     /**
@@ -340,12 +343,12 @@ public class RAIToImagePlus {
             final String title,
             final ExecutorService service )
     {
-        final ImageJVirtualStackUnsignedShort stack = ImageJVirtualStackUnsignedShort.wrap( img );
-        stack.setExecutorService( service );
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+                img, //
+                ImageJVirtualStackUnsignedShort::wrap, //
+                title, //
+                service //
+        );
     }
 
     /**
@@ -420,12 +423,12 @@ public class RAIToImagePlus {
             final String title,
             final ExecutorService service )
     {
-        final ImageJVirtualStackUnsignedByte stack = ImageJVirtualStackUnsignedByte.wrap( img );
-        stack.setExecutorService( service );
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+                img, //
+                ImageJVirtualStackUnsignedByte::wrap, //
+                title, //
+                service //
+        );
     }
 
     /**
@@ -466,12 +469,12 @@ public class RAIToImagePlus {
             final String title,
             final ExecutorService service )
     {
-        final ImageJVirtualStackUnsignedByte stack = ImageJVirtualStackUnsignedByte.wrapAndScaleBitType( img );
-        stack.setExecutorService( service );
-        final ImagePlus imp = makeImagePlus( img, stack, title );
-        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
-        stack.setWritable( true );
-        return imp;
+        return internalWrap( //
+            img, //
+            ImageJVirtualStackUnsignedByte::wrapAndScaleBitType, //
+            title, //
+            service //
+        );
     }
 
     /**
@@ -493,6 +496,20 @@ public class RAIToImagePlus {
             final String title )
     {
         return wrapAndScaleBit( img, title, null );
+    }
+
+    private static <T, U extends NativeType<U>> ImagePlus internalWrap(
+            final RandomAccessibleInterval< T > img,
+            final Function<RandomAccessibleInterval<T>, ImageJVirtualStack<U>> converter,
+            final String title,
+            final ExecutorService service )
+    {
+        final ImageJVirtualStack<U> stack = converter.apply(img);
+        stack.setExecutorService( service );
+        final ImagePlus imp = makeImagePlus( img, stack, title );
+        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
+        stack.setWritable( true );
+        return imp;
     }
 
     private static ImagePlus makeImagePlus( final Dimensions dims, final VirtualStack stack, final String title )
