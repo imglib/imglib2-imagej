@@ -417,9 +417,9 @@ public class RAIToImagePlus {
      * @param title the name assigned to the resulting {@link ImagePlus}
      * @param service the {@link ExecutorService} used for processing.
      * @return an {@link ImagePlus} wrapping {@code img}
-     * @see #wrapAndScaleBit(RandomAccessibleInterval, String, ExecutorService) for wrapping with scaling.
+     * @see #wrapAndScaleBoolean(RandomAccessibleInterval, String, ExecutorService) for wrapping with scaling.
      */
-    public static < B extends BooleanType< B >> ImagePlus wrapBit(
+    public static < B extends BooleanType< B >> ImagePlus wrapBoolean(
             final RandomAccessibleInterval< B > img,
             final String title,
             final ExecutorService service )
@@ -441,13 +441,13 @@ public class RAIToImagePlus {
      * @param img the {@link RandomAccessibleInterval} to wrap
      * @param title the name assigned to the resulting {@link ImagePlus}
      * @return an {@link ImagePlus} wrapping {@code img}
-     * @see #wrapAndScaleBit(RandomAccessibleInterval, String) for wrapping with scaling.
+     * @see #wrapAndScaleBoolean(RandomAccessibleInterval, String) for wrapping with scaling.
      */
-    public static < B extends BooleanType< B >> ImagePlus wrapBit(
+    public static < B extends BooleanType< B >> ImagePlus wrapBoolean(
             final RandomAccessibleInterval< B > img,
             final String title )
     {
-        return wrapBit( img, title, null );
+        return wrapBoolean( img, title, null );
     }
 
     /**
@@ -463,16 +463,16 @@ public class RAIToImagePlus {
      * @param title the name assigned to the resulting {@link ImagePlus}
      * @param service the {@link ExecutorService} used for processing.
      * @return an {@link ImagePlus} wrapping {@code img}
-     * @see #wrapBit(RandomAccessibleInterval, String, ExecutorService) for wrapping without scaling.
+     * @see #wrapBoolean(RandomAccessibleInterval, String, ExecutorService) for wrapping without scaling.
      */
-    public static < B extends BooleanType<B> > ImagePlus wrapAndScaleBit(
+    public static < B extends BooleanType<B> > ImagePlus wrapAndScaleBoolean(
             final RandomAccessibleInterval<B> img,
             final String title,
             final ExecutorService service )
     {
         return internalWrap( //
             img, //
-            ImageJVirtualStackUnsignedByte::wrapAndScaleBitType, //
+            ImageJVirtualStackUnsignedByte::wrapAndScaleBoolean, //
             title, //
             service //
         );
@@ -490,13 +490,13 @@ public class RAIToImagePlus {
      * @param img the {@link RandomAccessibleInterval} to wrap
      * @param title the name assigned to the resulting {@link ImagePlus}
      * @return an {@link ImagePlus} wrapping {@code img}
-     * @see #wrapBit(RandomAccessibleInterval, String) for wrapping without scaling.
+     * @see #wrapBoolean(RandomAccessibleInterval, String) for wrapping without scaling.
      */
-    public static < B extends BooleanType<B> > ImagePlus wrapAndScaleBit(
+    public static < B extends BooleanType<B> > ImagePlus wrapAndScaleBoolean(
             final RandomAccessibleInterval<B> img,
             final String title )
     {
-        return wrapAndScaleBit( img, title, null );
+        return wrapAndScaleBoolean( img, title, null );
     }
 
     private static <T, U extends NativeType<U>> ImagePlus internalWrap(
@@ -568,9 +568,9 @@ public class RAIToImagePlus {
      * @return an {@link ImagePlus} wrapping {@code rai}
      * @see ArrayImgToImagePlus
      */
-    public static ImagePlus wrapVirtualStackAndScaleBitType(final RandomAccessibleInterval< BitType > rai , final String title )
+    public static <B extends BooleanType<B>> ImagePlus wrapVirtualStackAndScaleBooleanType(final RandomAccessibleInterval< B > rai , final String title )
     {
-        return wrapVirtualStack( rai, title, RAIToImagePlus::createVirtualStackBits );
+        return wrapVirtualStack( rai, title, RAIToImagePlus::createVirtualStackBools);
     }
 
     private static < T > ImagePlus wrapVirtualStack(RandomAccessibleInterval< T > rai, final String title, final Function< RandomAccessibleInterval< T >, ImageJVirtualStack<?>> imageStackWrapper )
@@ -582,9 +582,9 @@ public class RAIToImagePlus {
         return result;
     }
 
-    private static ImageJVirtualStack<?> createVirtualStackBits(final RandomAccessibleInterval< BitType > sorted )
+    private static <B extends BooleanType<B>> ImageJVirtualStack<?> createVirtualStackBools(final RandomAccessibleInterval< B > sorted )
     {
-        return ImageJVirtualStackUnsignedByte.wrapAndScaleBitType( sorted );
+        return ImageJVirtualStackUnsignedByte.wrapAndScaleBoolean( sorted );
     }
 
     private static ImageJVirtualStack<?> createVirtualStack(final RandomAccessibleInterval< ? > rai )

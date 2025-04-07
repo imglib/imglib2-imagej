@@ -233,7 +233,7 @@ public class RAIToImagePlusTest
 	{
 		// setup
 		final Img< BitType > img = ArrayImgs.bits( 1, 1 );
-		final ImagePlus imagePlus = RAIToImagePlus.wrapAndScaleBit( img, "test" );
+		final ImagePlus imagePlus = RAIToImagePlus.wrapAndScaleBoolean( img, "test" );
 		// process
 		final ImageProcessor processor = imagePlus.getStack().getProcessor( 1 );
 		processor.setf( 0, 0, 255 );
