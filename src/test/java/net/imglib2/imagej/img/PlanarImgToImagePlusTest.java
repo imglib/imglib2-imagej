@@ -37,7 +37,6 @@ package net.imglib2.imagej.img;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.VirtualStack;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.imagej.ImagePlusToImg;
 import net.imglib2.img.basictypeaccess.array.FloatArray;
@@ -47,7 +46,6 @@ import net.imglib2.img.planar.PlanarImgFactory;
 import net.imglib2.img.planar.PlanarImgs;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.IntegerType;
-import net.imglib2.type.numeric.integer.ByteType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.view.Views;
@@ -158,7 +156,7 @@ public class PlanarImgToImagePlusTest
 	@Test
 	public void testConvertingBackAndForth() {
 		ImagePlus imagePlus = IJ.createImage( "test", "8-bit ramp", 3, 3, 3 );
-		PlanarImg<UnsignedByteType, ?> convertedImg = ImagePlusToImg.wrapByte( imagePlus );
+		PlanarImg<UnsignedByteType, ?> convertedImg = ImagePlusToImg.wrapByteDirect( imagePlus );
 		ImagePlus twiceConvertedImagePlus = PlanarImgToImagePlus.wrap( convertedImg, "title" );
 		twiceConvertedImagePlus.getStack().getProcessor( 1 ).set( 0, 0, 5 );
 		assertEquals( 5, imagePlus.getStack().getProcessor( 1 ).get( 0, 0 ) );

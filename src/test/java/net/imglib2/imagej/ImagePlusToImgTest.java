@@ -42,54 +42,71 @@ import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.NumericType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
+import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import org.junit.Test;
 
 /**
- * Tests the lazy wrapping functions of {@link ImagePlusToImgPlus}.
+ * Tests the lazy wrapping functions of {@link ImagePlusToImg}.
  *
  * @author Matthias Arzt
+ * @author Gabriel Selzer
  */
-public class ImagePlusToImgPlusLazyTest
+public class ImagePlusToImgTest
 {
 
 	private static final long[] DIMENSIONS = { 2, 3, 4, 5, 6 };
 
-	// TODO fix test
+	/**
+	 * Tests that {@link ImagePlusToImg#wrapByteCached(ImagePlus)} returns the
+	 * same image as {@link ImagePlusToImg#wrapByteDirect(ImagePlus)}.
+	 */
 	@Test
-	public void testUnsignedByte()
+	public void testWrapByteCached()
 	{
 		final ImagePlus image = randomImagePlus( 123, new UnsignedByteType(), DIMENSIONS );
-		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByte( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImg.wrapByteCached( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByteDirect( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
+	/**
+	 * Tests that {@link ImagePlusToImg#wrapShortCached(ImagePlus)} returns the
+	 * same image as {@link ImagePlusToImg#wrapShortDirect(ImagePlus)}.
+	 */
 	@Test
-	public void testUnsignedShort()
+	public void testWrapShortCached()
 	{
 		final ImagePlus image = randomImagePlus( 234, new UnsignedShortType(), DIMENSIONS );
-		final Img< UnsignedShortType > actual = ImagePlusToImgPlus.wrapShort( image );
-		final Img< UnsignedShortType > expected = ImagePlusToImg.wrapShort( image );
+		final Img< UnsignedShortType > actual = ImagePlusToImg.wrapShortCached( image );
+		final Img< UnsignedShortType > expected = ImagePlusToImg.wrapShortDirect( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
+	/**
+	 * Tests that {@link ImagePlusToImg#wrapRGBACached(ImagePlus)} returns the
+	 * same image as {@link ImagePlusToImg#wrapRGBADirect(ImagePlus)}.
+	 */
 	@Test
 	public void testRGB()
 	{
 		final ImagePlus image = randomImagePlus( 345, new ARGBType(), DIMENSIONS );
-		final Img< ARGBType > actual = ImagePlusToImgPlus.wrapRGBA( image );
-		final Img< ARGBType > expected = ImagePlusToImg.wrapRGBA( image );
+		final Img< ARGBType > actual = ImagePlusToImg.wrapRGBACached( image );
+		final Img< ARGBType > expected = ImagePlusToImg.wrapRGBADirect( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
+	/**
+	 * Tests that {@link ImagePlusToImg#wrapFloatCached(ImagePlus)} returns the
+	 * same image as {@link ImagePlusToImg#wrapFloatDirect(ImagePlus)}.
+	 */
 	@Test
 	public void testFloat()
 	{
 		final ImagePlus image = randomImagePlus( 456, new FloatType(), DIMENSIONS );
-		final Img< FloatType > actual = ImagePlusToImgPlus.wrapFloat( image );
-		final Img< FloatType > expected = ImagePlusToImg.wrapFloat( image );
+		final Img< FloatType > actual = ImagePlusToImg.wrapFloatCached( image );
+		final Img< FloatType > expected = ImagePlusToImg.wrapFloatDirect( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -97,8 +114,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testLowerNumDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 567, new UnsignedByteType(), 2, 3, 6 );
-		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByte( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImg.wrapByteCached( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByteDirect( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 
@@ -106,8 +123,8 @@ public class ImagePlusToImgPlusLazyTest
 	public void testSingletonDimensions()
 	{
 		final ImagePlus image = randomImagePlus( 678, new UnsignedByteType(), 2, 1, 1, 6 );
-		final Img< UnsignedByteType > actual = ImagePlusToImgPlus.wrapByte( image );
-		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByte( image );
+		final Img< UnsignedByteType > actual = ImagePlusToImg.wrapByteCached( image );
+		final Img< UnsignedByteType > expected = ImagePlusToImg.wrapByteDirect( image );
 		ImgLib2Assert.assertImageEquals( expected, actual );
 	}
 

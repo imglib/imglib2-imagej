@@ -35,25 +35,28 @@
 package net.imglib2.imagej;
 
 import ij.ImagePlus;
-import net.imglib2.Cursor;
 import net.imglib2.cache.Cache;
 import net.imglib2.cache.ref.SoftRefLoaderCache;
-import net.imglib2.converter.Converter;
-import net.imglib2.imagej.imageplus.*;
-import net.imglib2.img.Img;
-import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
+import net.imglib2.imagej.imageplus.ByteImagePlus;
+import net.imglib2.imagej.imageplus.FloatImagePlus;
+import net.imglib2.imagej.imageplus.IntImagePlus;
+import net.imglib2.imagej.imageplus.ShortImagePlus;
+import net.imglib2.img.basictypeaccess.array.*;
 import net.imglib2.img.planar.PlanarImg;
-import net.imglib2.type.Type;
+import net.imglib2.type.NativeType;
+import net.imglib2.type.NativeTypeFactory;
 import net.imglib2.type.numeric.ARGBType;
-import net.imglib2.type.numeric.ComplexType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedIntType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Fraction;
 
 import java.util.AbstractList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
+import java.util.stream.LongStream;
 
 /**
  * Provides convenience functions to wrap ImageJ 1.x data structures as ImgLib2
@@ -63,31 +66,54 @@ import java.util.function.Function;
  * @author Stephan Preibisch
  * @author Stephan Saalfeld
  * @author Matthias Arzt
+ * @author Gabriel Selzer
  */
 public class ImagePlusToImg
 {
 
-	public static PlanarImg< ?, ? > wrap( final ImagePlus imp )
+	/**
+	 * Wraps an {@link ImagePlus} into a {@link PlanarImg}.
+	 * <p>
+	 * Under the hood, each {@link ij.process.ImageProcessor}'s backing array is
+	 * wrapped into an {@link ArrayDataAccess}. The resulting {@link List} of
+	 * {@link ArrayDataAccess}es is used to form a {@link PlanarImg}.
+	 * </p>
+	 *
+	 * @param imp the {@link ImagePlus} to wrap
+	 * @return a {@link PlanarImg} directly wrapping {@code imp}
+	 */
+	public static PlanarImg< ?, ? > wrapDirect(final ImagePlus imp )
 	{
 		switch ( imp.getType() )
 		{
 		case ImagePlus.GRAY8:
-			return wrapByte( imp );
+			return wrapByteDirect( imp );
 		case ImagePlus.GRAY16:
-			return wrapShort( imp );
+			return wrapShortDirect( imp );
 		case ImagePlus.GRAY32:
-			return wrapFloat( imp );
+			return wrapFloatDirect( imp );
 		case ImagePlus.COLOR_RGB:
-			return wrapRGBA( imp );
+			return wrapRGBADirect( imp );
 		default:
 			throw new RuntimeException( "Only 8, 16, 32-bit and RGB supported!" );
 		}
 	}
 
-	public static PlanarImg< UnsignedByteType, ? > wrapByte(final ImagePlus imp )
+	/**
+	 * Wraps an {@link ImagePlus} into a {@link PlanarImg} of unsigned bytes.
+	 * <p>
+	 * Under the hood, each {@link ij.process.ImageProcessor}'s backing array is
+	 * wrapped into an {@link ByteArray}. The resulting {@link List} of
+	 * {@link ArrayDataAccess}es is used to form a {@link PlanarImg}.
+	 * </p>
+	 *
+	 * @param imp the {@link ImagePlus} to wrap
+	 * @return a {@link PlanarImg} of unsigned bytes directly wrapping {@code imp}
+	 */
+	public static PlanarImg< UnsignedByteType, ? > wrapByteDirect(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.GRAY8 )
-			return null;
+			throw new IllegalArgumentException(imp + " does not contain unsigned bytes!");
 
 		final ByteImagePlus< UnsignedByteType > container = new ByteImagePlus<>( imp );
 
@@ -100,10 +126,21 @@ public class ImagePlusToImg
 		return container;
 	}
 
-	public static PlanarImg< UnsignedShortType, ? > wrapShort(final ImagePlus imp )
+	/**
+	 * Wraps an {@link ImagePlus} into a {@link PlanarImg} of unsigned shorts.
+	 * <p>
+	 * Under the hood, each {@link ij.process.ImageProcessor}'s backing array is
+	 * wrapped into an {@link ShortArray}. The resulting {@link List} of
+	 * {@link ArrayDataAccess}es is used to form a {@link PlanarImg}.
+	 * </p>
+	 *
+	 * @param imp the {@link ImagePlus} to wrap
+	 * @return a {@link PlanarImg} of unsigned shorts directly wrapping {@code imp}
+	 */
+	public static PlanarImg< UnsignedShortType, ? > wrapShortDirect(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.GRAY16 )
-			return null;
+			throw new IllegalArgumentException(imp + " does not contain unsigned shorts!");
 
 		final ShortImagePlus< UnsignedShortType > container = new ShortImagePlus<>( imp );
 
@@ -116,26 +153,21 @@ public class ImagePlusToImg
 		return container;
 	}
 
-	public static PlanarImg< UnsignedIntType, ? > wrapInt(final ImagePlus imp )
-	{
-		if( imp.getType() != ImagePlus.COLOR_RGB )
-			return null;
-
-		final IntImagePlus< UnsignedIntType > container = new IntImagePlus<>( imp );
-
-		// create a Type that is linked to the container
-		final UnsignedIntType linkedType = new UnsignedIntType( container );
-
-		// pass it to the DirectAccessContainer
-		container.setLinkedType( linkedType );
-
-		return container;
-	}
-
-	public static PlanarImg< ARGBType, ? > wrapRGBA( final ImagePlus imp )
+	/**
+	 * Wraps an {@link ImagePlus} into a {@link PlanarImg} of RGBA tuples.
+	 * <p>
+	 * Under the hood, each {@link ij.process.ImageProcessor}'s backing array is
+	 * wrapped into an {@link IntArray}. The resulting {@link List} of
+	 * {@link ArrayDataAccess}es is used to form a {@link PlanarImg}.
+	 * </p>
+	 *
+	 * @param imp the {@link ImagePlus} to wrap
+	 * @return a {@link PlanarImg} of ARGB tuples directly wrapping {@code imp}
+	 */
+	public static PlanarImg< ARGBType, ? > wrapRGBADirect(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.COLOR_RGB )
-			return null;
+			throw new IllegalArgumentException(imp + " does not contain RGB tuples!");
 
 		final IntImagePlus< ARGBType > container = new IntImagePlus<>( imp );
 
@@ -148,10 +180,21 @@ public class ImagePlusToImg
 		return container;
 	}
 
-	public static PlanarImg< FloatType, ? > wrapFloat(final ImagePlus imp )
+	/**
+	 * Wraps an {@link ImagePlus} into a {@link PlanarImg} of floats.
+	 * <p>
+	 * Under the hood, each {@link ij.process.ImageProcessor}'s backing array is
+	 * wrapped into an {@link FloatArray}. The resulting {@link List} of
+	 * {@link ArrayDataAccess}es is used to form a {@link PlanarImg}.
+	 * </p>
+	 *
+	 * @param imp the {@link ImagePlus} to wrap
+	 * @return a {@link PlanarImg} of floats directly wrapping {@code imp}
+	 */
+	public static PlanarImg< FloatType, ? > wrapFloatDirect(final ImagePlus imp )
 	{
 		if ( imp.getType() != ImagePlus.GRAY32 )
-			return null;
+			throw new IllegalArgumentException(imp + " does not contain floats!");
 
 		final FloatImagePlus< FloatType > container = new FloatImagePlus<>( imp );
 
@@ -164,61 +207,89 @@ public class ImagePlusToImg
 		return container;
 	}
 
-	public static PlanarImg< FloatType, ? > convertFloat( final ImagePlus imp )
+	/**
+	 * Wraps an 8 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them.
+	 */
+	public static PlanarImg< UnsignedByteType, ByteArray > wrapByteCached(final ImagePlus image )
 	{
-
-		switch ( imp.getType() )
-		{
-		case ImagePlus.GRAY8:
-			return convertToFloat( wrapByte( imp ), new NumberToFloatConverter< UnsignedByteType >() );
-		case ImagePlus.GRAY16:
-			return convertToFloat( wrapShort( imp ), new NumberToFloatConverter< UnsignedShortType >() );
-		case ImagePlus.GRAY32:
-			return wrapFloat( imp );
-		case ImagePlus.COLOR_RGB:
-			return convertToFloat( wrapRGBA( imp ), new ARGBtoFloatConverter() );
-		default:
-			throw new RuntimeException( "Only 8, 16, 32-bit and RGB supported!" );
-		}
+		return internWrap( image, ImagePlus.GRAY8, new UnsignedByteType(), array -> new ByteArray( ( byte[] ) array ) );
 	}
 
-	static private class ARGBtoFloatConverter implements Converter< ARGBType, FloatType >
+	/**
+	 * Wraps a 16 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them.
+	 */
+	public static PlanarImg< UnsignedShortType, ShortArray > wrapShortCached(final ImagePlus image )
 	{
-		/** Luminance times alpha. */
-		@Override
-		public void convert( final ARGBType input, final FloatType output )
-		{
-			final int v = input.get();
-			output.setReal( ( ( v >> 24 ) & 0xff ) * ( ( ( v >> 16 ) & 0xff ) * 0.299 + ( ( v >> 8 ) & 0xff ) * 0.587 + ( v & 0xff ) * 0.144 ) );
-		}
+		return internWrap( image, ImagePlus.GRAY16, new UnsignedShortType(), array -> new ShortArray( ( short[] ) array ) );
 	}
 
-	static private class NumberToFloatConverter< T extends ComplexType< T > > implements Converter< T, FloatType >
+	/**
+	 * Wraps a 32 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them.
+	 */
+	public static PlanarImg< FloatType, FloatArray > wrapFloatCached(final ImagePlus image )
 	{
-		@Override
-		public void convert( final T input, final FloatType output )
-		{
-			output.setReal( input.getRealFloat() );
-		}
+		return internWrap( image, ImagePlus.GRAY32, new FloatType(), array -> new FloatArray( ( float[] ) array ) );
 	}
 
-	protected static < T extends Type< T > > PlanarImg< FloatType, ?> convertToFloat(
-			final Img< T > input, final Converter< T, FloatType > c )
+	/**
+	 * Wraps a 24 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
+	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
+	 * needed, and caches them.
+	 */
+	public static PlanarImg< ARGBType, IntArray > wrapRGBACached(final ImagePlus image )
 	{
-		final ImagePlusImg< FloatType, ? > output = new ImagePlusImgFactory<>( new FloatType() ).create( input );
+		return internWrap( image, ImagePlus.COLOR_RGB, new ARGBType(), array -> new IntArray( ( int[] ) array ) );
+	}
 
-		final Cursor< T > in = input.cursor();
-		final Cursor< FloatType > out = output.cursor();
-
-		while ( in.hasNext() )
+	/**
+	 * Wraps an {@link ImagePlus}, into an {@link PlanarImg}, that is backed by a
+	 * {@link PlanarImg}. The {@link PlanarImg} loads the planes only if needed,
+	 * and caches them. The pixel type of the returned image depends on the type
+	 * of the ImagePlus.
+	 */
+	public static PlanarImg< ?, ? > wrapCached(final ImagePlus image )
+	{
+		switch ( image.getType() )
 		{
-			in.fwd();
-			out.fwd();
-
-			c.convert( in.get(), out.get() );
+			case ImagePlus.GRAY8:
+				return wrapByteCached( image );
+			case ImagePlus.GRAY16:
+				return wrapShortCached( image );
+			case ImagePlus.GRAY32:
+				return wrapFloatCached( image );
+			case ImagePlus.COLOR_RGB:
+				return wrapRGBACached( image );
 		}
+		throw new RuntimeException( "Only 8, 16, 32-bit and RGB supported!" );
+	}
 
-		return output;
+	private static < T extends NativeType< T >, A extends ArrayDataAccess< A > > PlanarImg< T, A > internWrap(
+			final ImagePlus image,
+			final int expectedType,
+			final T type,
+			final Function< Object, A > createArrayAccess
+	) {
+		if ( image.getType() != expectedType )
+			throw new IllegalArgumentException();
+		final ImagePlusLoader< A > loader = new ImagePlusLoader<>( image, createArrayAccess );
+		final long[] dimensions = getNonTrivialDimensions( image );
+		final PlanarImg< T, A > cached = new PlanarImg<>( loader, dimensions, new Fraction() );
+		cached.setLinkedType( ( (NativeTypeFactory< T, A >) type.getNativeTypeFactory() ).createLinkedType( cached ) );
+		// TODO: Preserve metadata
+		return cached;
+	}
+
+	private static long[] getNonTrivialDimensions(final ImagePlus image )
+	{
+		final LongStream xy = LongStream.of( image.getWidth(), image.getHeight() );
+		final LongStream czt = LongStream.of( image.getNChannels(), image.getNSlices(), image.getNFrames() );
+		return LongStream.concat( xy, czt.filter( x -> x > 1 ) ).toArray();
 	}
 
 	private static class ImagePlusLoader< A extends ArrayDataAccess< A >> extends AbstractList< A >
@@ -260,6 +331,4 @@ public class ImagePlusToImg
 			return image.getStackSize();
 		}
 	}
-
-	//
 }
