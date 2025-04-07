@@ -13,7 +13,7 @@ Unfortunately, `imglib/imglib2-ij` cannot be used with Java 11+, because of the 
 
 To resolve these errors (and for organization) this library changed many names. Below you'll find commonly-used functions from `imglib/imglib2-ij`, as well as their drop-in replacements from `imglib/imglib2-imagej`:
 
-**`net.imglib2.img.display.imagej.ImgToVirtualStack.wrap*` have been renamed to `net.imglib2.imagej.ImgPlusToImagePlus.wrap*`**.
+**`net.imglib2.img.display.imagej.ImgToVirtualStack.wrap*` have been renamed to `net.imglib2.imagej.RAIToImagePlus.wrapVirtualStack*`**.
 **`net.imglib2.img.VirtualStackAdapter.wrap*` have been renamed to `net.imglib2.imagej.ImagePlusToImg.wrap*`**.
 **`net.imglib2.img.ImagePlusAdapter.wrap*` have been renamed to `net.imglib2.imagej.ImagePlusToImg.wrap*`**.
 **`net.imglib2.img.ImageJFunctions.wrap*(ImagePlus)` have been renamed to `net.imglib2.imagej.ImagePlusToImg.wrap*`**.

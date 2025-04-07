@@ -13,6 +13,7 @@ import net.imglib2.imagej.img.*;
 import net.imglib2.img.basictypeaccess.IntAccess;
 import net.imglib2.type.BooleanType;
 import net.imglib2.type.NativeType;
+import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.*;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
@@ -536,6 +537,87 @@ public class RAIToImagePlus {
             imp.setDimensions( c, s, f );
         }
         return imp;
+    }
+
+    /**
+     * Wraps an {@link RandomAccessibleInterval} into an {@link ImagePlus}. The
+     * image can be {@link RealType} or {@link ARGBType}. The {@link ImagePlus}
+     * is backed by a special {@link VirtualStack}, which copies an plane
+     * from the given image, instead of it plane from a file.
+     * <p>
+     * Only up to five dimensions are supported. Axes can might be arbitrary. The
+     * image title and calibration are derived from the given image.
+     *
+     * @param rai the {@link RandomAccessibleInterval} to convert
+     * @param title the title to assign to the output
+     * @return an {@link ImagePlus} wrapping {@code rai}
+     * @see ArrayImgToImagePlus
+     */
+    public static ImagePlus wrapVirtualStack(final RandomAccessibleInterval< ? > rai, final String title )
+    {
+        return wrapVirtualStack( rai, title, RAIToImagePlus::createVirtualStack );
+    }
+
+    /**
+     * Similar to {@link #wrapVirtualStack(RandomAccessibleInterval, String)}, but works only
+     * for {@link RandomAccessibleInterval}s of {@link BitType}. The pixel values
+     * of 0 and 1 are scaled to 0 and 255.
+     *
+     * @param rai the {@link RandomAccessibleInterval} to convert. Must contain bits.
+     * @param title the title to assign to the output
+     * @return an {@link ImagePlus} wrapping {@code rai}
+     * @see ArrayImgToImagePlus
+     */
+    public static ImagePlus wrapVirtualStackAndScaleBitType(final RandomAccessibleInterval< BitType > rai , final String title )
+    {
+        return wrapVirtualStack( rai, title, RAIToImagePlus::createVirtualStackBits );
+    }
+
+    private static < T > ImagePlus wrapVirtualStack(RandomAccessibleInterval< T > rai, final String title, final Function< RandomAccessibleInterval< T >, ImageJVirtualStack<?>> imageStackWrapper )
+    {
+        final ImageJVirtualStack<?> stack = imageStackWrapper.apply( rai );
+        final ImagePlus result = new ImagePlus( title, stack );
+        // NB: setWritable after the ImagePlus is created. Otherwise a useless stack.setPixels(...) call would be performed.
+        stack.setWritable( true );
+        return result;
+    }
+
+    private static ImageJVirtualStack<?> createVirtualStackBits(final RandomAccessibleInterval< BitType > sorted )
+    {
+        return ImageJVirtualStackUnsignedByte.wrapAndScaleBitType( sorted );
+    }
+
+    private static ImageJVirtualStack<?> createVirtualStack(final RandomAccessibleInterval< ? > rai )
+    {
+        final Object type = rai.randomAccess().get();
+        if ( type instanceof RealType )
+            return createVirtualStackRealType( cast( rai ) );
+        if ( type instanceof ARGBType )
+            return ImageJVirtualStackARGB.wrap( cast( rai ) );
+        throw new IllegalArgumentException( "Unsupported type" );
+    }
+
+    private static < T > T cast(final Object in )
+    {
+        @SuppressWarnings( "unchecked" )
+        final
+        T out = ( T ) in;
+        return out;
+    }
+
+    private static ImageJVirtualStack< ? > createVirtualStackRealType(final RandomAccessibleInterval< ? extends RealType< ? > > rai )
+    {
+        final RealType< ? extends RealType< ? > > type = rai.randomAccess().get();
+        final int bitDepth = type.getBitsPerPixel();
+        final boolean isSigned = type.getMinValue() < 0;
+
+        if ( bitDepth <= 8 && !isSigned )
+            return ImageJVirtualStackUnsignedByte.wrap( rai );
+        if ( bitDepth <= 16 && !isSigned )
+            return ImageJVirtualStackUnsignedShort.wrap( rai );
+
+        // other types translated as 32-bit float data
+        return ImageJVirtualStackFloat.wrap( rai );
     }
 
     private static class RGBAConverter<T extends RealType<T>, C extends Composite<T>> implements SamplerConverter<C, ARGBType> {
