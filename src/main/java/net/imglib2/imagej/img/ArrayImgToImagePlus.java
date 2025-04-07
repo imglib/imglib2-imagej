@@ -34,27 +34,14 @@
 
 package net.imglib2.imagej.img;
 
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imagej.axis.CalibratedAxis;
-import net.imglib2.imagej.ImgPlusToImagePlus;
-import net.imglib2.imagej.ImgPlusViews;
-import net.imglib2.img.Img;
+import ij.ImagePlus;
+import ij.process.ImageProcessor;
 import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
-
-import ij.ImagePlus;
-import ij.process.ImageProcessor;
 
 public class ArrayImgToImagePlus
 {
@@ -64,62 +51,53 @@ public class ArrayImgToImagePlus
 	}
 
 	/**
-	 * Indicates if {@link #wrap(ImgPlus)} wrap} supports the image.
+	 * Indicates if {@link #wrap(net.imglib2.img.array.ArrayImg, String)} wrap} supports the image.
 	 *
+	 * @param obj an {@link Object} that may be supported by {@code wrap}
+	 * @return {@code true} iff {@code obj} can be converted into an {@link ImagePlus}.
 	 * @see PlanarImgToImagePlus
-	 * @see ImgPlusToImagePlus
+	 * @see CellImgToImagePlus
 	 */
-	public static boolean isSupported( ImgPlus< ? > imgPlus )
+	public static boolean isSupported( Object obj )
 	{
-		imgPlus = ImgPlusViews.fixAxes( imgPlus );
-		return imgPlus.getImg() instanceof ArrayImg &&
-				imgPlus.numDimensions() == 2 &&
-				checkAxis( getAxes( imgPlus ) ) &&
-				ImageProcessorUtils.isSupported( ( NativeType< ? > ) imgPlus.randomAccess().get() );
+		if (! (obj instanceof ArrayImg))
+			return false;
+		ArrayImg<?, ?> img = (ArrayImg<?, ?>) obj;
+		Object storageArray = img.update(null);
+		if (! (storageArray instanceof ArrayDataAccess))
+			return false;
+		return img.numDimensions() == 2 &&
+				ImageProcessorUtils.isSupported( img.getType() );
 	}
 
 	/**
-	 * Takes an {@link ImgPlus} (IJ2) and wraps it into an {@link ImagePlus}
-	 * (IJ1). This only works when {@link ImgPlus} is backed by a two
+	 * Takes an {@link ArrayImg} and wraps it into an {@link ImagePlus}
+	 * (IJ1). This only works when {@link ArrayImg} is backed by a two
 	 * dimensional {@link ArrayImg}. Type of the image must be
 	 * {@link UnsignedByteType}, {@link UnsignedShortType}, {@link ARGBType} or
 	 * {@link FloatType}.
 	 * <p>
 	 * The returned {@link ImagePlus} uses the same pixel buffer as the given
 	 * image. Changes to the {@link ImagePlus} are therefore correctly reflected
-	 * in the {@link ImgPlus}. The title and calibration are derived from the
+	 * in the {@link ArrayImg}. The title and calibration are derived from the
 	 * given image.
 	 * <p>
-	 * Use {@link #isSupported(ImgPlus)} to check if an {@link ImagePlus} is
+	 * Use {@link #isSupported(Object)} to check if an {@link ImagePlus} is
 	 * supported.
 	 *
+	 * @param img the {@link ArrayImg} to convert
+	 * @param name the {@link String} title to assign to the result
+	 * @return an {@link ImagePlus} wrapping the data in {@code img}
 	 * @see PlanarImgToImagePlus
-	 * @see ImgPlusToImagePlus
+	 * @see CellImgToImagePlus
 	 */
-	public static ImagePlus wrap( ImgPlus< ? > imgPlus )
+	public static ImagePlus wrap(ArrayImg< ?, ? extends ArrayDataAccess<?> > img, String name)
 	{
-		imgPlus = ImgPlusViews.fixAxes( imgPlus );
-		final Img< ? > img = imgPlus.getImg();
-		if ( !( img instanceof ArrayImg ) )
-			throw new IllegalArgumentException( "Expecting ArrayImg" );
-		final ArrayImg< ?, ArrayDataAccess< ? > > arrayImg = ( ArrayImg< ?, ArrayDataAccess< ? > > ) img;
 		final int sizeX = ( int ) img.dimension( 0 );
 		final int sizeY = ( int ) img.dimension( 1 );
-		final Object pixels = arrayImg.update( null ).getCurrentStorageArray();
+		final Object pixels = img.update( null ).getCurrentStorageArray();
 		final ImageProcessor processor = ImageProcessorUtils.createImageProcessor( pixels, sizeX, sizeY, null );
-		final ImagePlus imagePlus = new ImagePlus( imgPlus.getName(), processor );
-		CalibrationUtils.copyCalibrationToImagePlus( imgPlus, imagePlus );
-		return imagePlus;
-	}
-
-	private static boolean checkAxis( final List< AxisType > axes )
-	{
-		return axes.size() == 2 && axes.get( 0 ) == Axes.X && axes.get( 1 ) == Axes.Y;
-	}
-
-	private static List< AxisType > getAxes( final ImgPlus< ? > img )
-	{
-		return IntStream.range( 0, img.numDimensions() ).mapToObj( img::axis ).map( CalibratedAxis::type ).collect( Collectors.toList() );
+        return new ImagePlus( name, processor );
 	}
 
 }

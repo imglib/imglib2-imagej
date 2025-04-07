@@ -114,7 +114,10 @@ public abstract class AbstractVirtualStack extends VirtualStack
 		return ( n - 1 ) + offset;
 	}
 
-	/** If this method return's false the methods {@link #setPixels} and {@link #setVoxels} will have no effect. */
+	/**
+	 * If this method return's false the methods {@link #setPixels} and {@link #setVoxels} will have no effect.
+	 * @return true if this {@link VirtualStack} is writable
+	 */
 	protected boolean isWritable() {
 		return true;
 	}
@@ -126,6 +129,7 @@ public abstract class AbstractVirtualStack extends VirtualStack
 	 * The type of the array must be byte[], short[], int[] or float[] and must match the type indicated by {@link #getBitDepth()}.
 	 *
 	 * @param index Zero based index of the plane. (Warning {@link VirtualStack#getPixels(int)} uses one base indices).
+	 * @return a primitive array containing the backing data of this {@link VirtualStack}
 	 * @see ImageStack#getBitDepth()
 	 */
 	protected abstract Object getPixelsZeroBasedIndex( int index );
@@ -149,6 +153,7 @@ public abstract class AbstractVirtualStack extends VirtualStack
 	 * fot 32-bit images.
 	 *
 	 * @param index Zero based index of the plane. (Warning {@link VirtualStack#getPixels(int)} uses one base indices).
+	 * @return a 2D {@code RandomAccessibleInterval}
 	 */
 	protected RandomAccessibleInterval< ? > getSliceZeroBasedIndex( int index )
 	{

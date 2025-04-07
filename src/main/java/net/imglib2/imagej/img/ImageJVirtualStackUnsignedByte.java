@@ -41,10 +41,8 @@ import net.imglib2.converter.Converters;
 import net.imglib2.converter.readwrite.SamplerConverter;
 import net.imglib2.img.basictypeaccess.ByteAccess;
 import net.imglib2.type.BooleanType;
-import net.imglib2.type.logic.BitType;
 import net.imglib2.type.numeric.RealType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
-import net.imglib2.util.Util;
 
 import java.util.concurrent.ExecutorService;
 
@@ -66,7 +64,7 @@ public class ImageJVirtualStackUnsignedByte extends ImageJVirtualStack< Unsigned
 		return Converters.convert(source, new ToUnsignedByteSamplerConverter( source.getType() ) );
 	}
 
-	public static ImageJVirtualStackUnsignedByte wrapAndScaleBitType( final RandomAccessibleInterval< BitType > source )
+	public static <B extends BooleanType<B>> ImageJVirtualStackUnsignedByte wrapAndScaleBoolean(final RandomAccessibleInterval< B > source )
 	{
 		return new ImageJVirtualStackUnsignedByte( Converters.convert(source, new ToBitByteSamplerConverter()) );
 	}

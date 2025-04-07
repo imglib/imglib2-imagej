@@ -34,40 +34,22 @@
 
 package net.imglib2.imagej.img;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.function.IntUnaryOperator;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-
-import net.imagej.ImgPlus;
-import net.imagej.axis.Axes;
-import net.imagej.axis.AxisType;
-import net.imagej.axis.CalibratedAxis;
+import ij.ImagePlus;
+import ij.VirtualStack;
 import net.imglib2.Interval;
-import net.imglib2.imagej.ImgPlusViews;
-import net.imglib2.imagej.ImgPlusToImagePlus;
-import net.imglib2.img.Img;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
-import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
-import net.imglib2.img.basictypeaccess.array.ByteArray;
-import net.imglib2.img.basictypeaccess.array.FloatArray;
-import net.imglib2.img.basictypeaccess.array.IntArray;
-import net.imglib2.img.basictypeaccess.array.ShortArray;
+import net.imglib2.img.basictypeaccess.array.*;
+import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.planar.PlanarImg;
-import net.imglib2.type.NativeType;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
 import net.imglib2.type.numeric.integer.UnsignedByteType;
 import net.imglib2.type.numeric.integer.UnsignedShortType;
 import net.imglib2.type.numeric.real.FloatType;
 import net.imglib2.util.Cast;
-import net.imglib2.util.IntervalIndexer;
 
-import ij.ImagePlus;
-import ij.VirtualStack;
+import java.util.function.IntUnaryOperator;
+import java.util.stream.IntStream;
 
 /**
  * Utility class to convert a {@link PlanarImg} to an {@link ImagePlus}
@@ -75,7 +57,6 @@ import ij.VirtualStack;
  * UnsignedByteType, UnsignedShortType, ARGBType and FloatType.
  *
  * @see ArrayImgToImagePlus
- * @see ImgPlusToImagePlus
  * @see CellImgToImagePlus
  */
 public class PlanarImgToImagePlus extends AbstractVirtualStack
@@ -84,56 +65,46 @@ public class PlanarImgToImagePlus extends AbstractVirtualStack
 	// static
 
 	/**
-	 * Returns true, if {@link #wrap(ImgPlus)} supports the given image.
+	 * Returns true, if {@link #wrap(PlanarImg, String)} supports the given image.
+	 * @param obj an {@link Object} that may be supported by {@code wrap}
+	 * @return {@code true} iff {@code obj} can be converted into an {@link ImagePlus}.
 	 */
-	public static boolean isSupported( ImgPlus< ? > imgPlus )
+	public static boolean isSupported( Object obj )
 	{
-		imgPlus = ImgPlusViews.fixAxes( imgPlus );
-		return imgPlus.getImg() instanceof PlanarImg &&
-				checkAxisOrder( getAxes( imgPlus ) ) &&
-				ImageProcessorUtils.isSupported( ( NativeType< ? > ) imgPlus.randomAccess().get() );
+		if (!(obj instanceof PlanarImg))
+			return false;
+		PlanarImg<?, ?> img = (PlanarImg<?, ?>) obj;
+		return ImageProcessorUtils.isSupported(img.getType());
 	}
 
 	/**
-	 * Wraps an {@link ImgPlus}, that is backed by an {@link PlanarImg} into and
-	 * {@link ImagePlus}. The returned {@link ImagePlus} uses the same pixel
-	 * buffer as the given image. Changes to the {@link ImagePlus} are therefore
-	 * reflected in the {@link ImgPlus}.
+	 * Wraps a {@link PlanarImg} into an {@link ImagePlus}. The returned
+	 * {@link ImagePlus} uses the same pixel buffer as the given image.
+	 * Changes to the {@link ImagePlus} are therefore reflected in the
+	 * {@link PlanarImg}.
 	 * <p>
 	 * The image must be {@link UnsignedByteType}, {@link UnsignedShortType},
 	 * {@link ARGBType} or {@link FloatType}. Only up to five dimensions are
-	 * support. Axes oder must start with X, Y axes. Channel, Time and Z axes
-	 * might follow in arbitrary order. The image title and calibration are
-	 * derived from the given image.
+	 * supported. Axes are presumed to start with X, Y. Channel, Z, and Time
+	 * axes are assumed to map to any following dimensions, in that order.
 	 * <p>
-	 * Use {@link #isSupported(ImgPlus)} to check if an {@link ImagePlus} is
+	 * Use {@link #isSupported(Object)} to check if the {@link PlanarImg} is
 	 * supported.
 	 *
-	 * @see #isSupported(ImgPlus)
+	 * @param img the {@link PlanarImg} to convert
+	 * @param name the {@link String} title to assign to the result
+	 * @return an {@link ImagePlus} wrapping the data in {@code img}
+	 * @see #isSupported(Object)
 	 */
-	public static ImagePlus wrap( ImgPlus< ? > imgPlus )
+	public static ImagePlus wrap(PlanarImg< ?, ? > img, String name )
 	{
-		imgPlus = ImgPlusViews.fixAxes( imgPlus );
-		final Img< ? > img = imgPlus.getImg();
-		if ( !( img instanceof PlanarImg ) )
-			throw new IllegalArgumentException( "Image must be a PlanarImg." );
-		final IntUnaryOperator indexer = getIndexer( imgPlus );
-		final VirtualStack stack = new PlanarImgToImagePlus( ( PlanarImg< ?, ? > ) img, indexer );
-		final ImagePlus imagePlus = new ImagePlus( imgPlus.getName(), stack );
-		imagePlus.setDimensions( dimension( imgPlus, Axes.CHANNEL ), dimension( imgPlus, Axes.Z ), dimension( imgPlus, Axes.TIME ) );
-		CalibrationUtils.copyCalibrationToImagePlus( imgPlus, imagePlus );
-		return imagePlus;
-	}
-
-	private static int dimension( final ImgPlus< ? > imgPlus, final AxisType axisType )
-	{
-		final int index = imgPlus.dimensionIndex( axisType );
-		return index < 0 ? 1 : ( int ) imgPlus.dimension( index );
-	}
-
-	public static VirtualStack wrap( final PlanarImg< ?, ? > img )
-	{
-		return new PlanarImgToImagePlus( img, x -> x );
+		final VirtualStack stack = new PlanarImgToImagePlus( img, x -> x );
+		final ImagePlus imp = new ImagePlus(name, stack);
+		final int c = img.numDimensions() > 2 ? (int) img.dimension(2) : 1;
+		final int z = img.numDimensions() > 3 ? (int) img.dimension(3) : 1;
+		final int t = img.numDimensions() > 4 ? (int) img.dimension(4) : 1;
+		imp.setDimensions(c, z, t);
+		return imp;
 	}
 
 	// fields
@@ -212,73 +183,6 @@ public class PlanarImgToImagePlus extends AbstractVirtualStack
 		if ( type instanceof FloatType )
 			return 32;
 		throw new IllegalArgumentException( "unsupported type" );
-	}
-
-	private static IntUnaryOperator getIndexer( final ImgPlus< ? > imgPlus )
-	{
-		final List< AxisType > axes = getAxes( imgPlus );
-		if ( !checkAxisOrder( axes ) )
-			throw new IllegalArgumentException( "Unsupported axis order, first axis must be X, second axis must be Y, and then optionally, arbitrary ordered: channel, Z and time." );
-		if ( inPreferredOrder( axes ) )
-			return x -> x;
-		final int[] stackSizes = { dimension( imgPlus, Axes.CHANNEL ), dimension( imgPlus, Axes.Z ), dimension( imgPlus, Axes.TIME ) };
-		final int channelSkip = getSkip( imgPlus, Axes.CHANNEL );
-		final int zSkip = getSkip( imgPlus, Axes.Z );
-		final int timeSkip = getSkip( imgPlus, Axes.TIME );
-		return stackIndex -> {
-			final int[] stackPosition = new int[ 3 ];
-			IntervalIndexer.indexToPosition( stackIndex, stackSizes, stackPosition );
-			return channelSkip * stackPosition[ 0 ] + zSkip * stackPosition[ 1 ] + timeSkip * stackPosition[ 2 ];
-		};
-	}
-
-	private static List< AxisType > getAxes( final ImgPlus< ? > img )
-	{
-		return IntStream.range( 0, img.numDimensions() ).mapToObj( img::axis ).map( CalibratedAxis::type ).collect( Collectors.toList() );
-	}
-
-	private static boolean checkAxisOrder( final List< AxisType > axes )
-	{
-		return axes.size() >= 2 && axes.size() <= 5 && testUnique( axes ) &&
-				axes.get( 0 ) == Axes.X && axes.get( 1 ) == Axes.Y &&
-				axes.stream().allMatch( ALLOWED_AXES::contains );
-	}
-
-	private static final List< AxisType > ALLOWED_AXES = Arrays.asList( Axes.X, Axes.Y, Axes.CHANNEL, Axes.Z, Axes.TIME );
-
-	private static boolean inPreferredOrder( final List< AxisType > axes )
-	{
-		for ( int i = 0; i < axes.size() - 1; i++ )
-			if ( preferredPosition( axes.get( i ) ) >= preferredPosition( axes.get( i + 1 ) ) )
-				return false;
-		return true;
-	}
-
-	private static int preferredPosition( final AxisType axisType )
-	{
-		if ( axisType == Axes.X )
-			return 0;
-		if ( axisType == Axes.Y )
-			return 1;
-		if ( axisType == Axes.CHANNEL )
-			return 2;
-		if ( axisType == Axes.Z )
-			return 3;
-		if ( axisType == Axes.TIME )
-			return 4;
-		throw new IllegalArgumentException( "unknown axis" );
-	}
-
-	private static int getSkip( final ImgPlus< ? > imgPlus, final AxisType axis )
-	{
-		final int channelIndex = imgPlus.dimensionIndex( axis );
-		return IntStream.range( 2, channelIndex ).map( i -> ( int ) imgPlus.dimension( i ) ).reduce( 1, ( a, b ) -> a * b );
-	}
-
-	private static < T > boolean testUnique( final List< T > list )
-	{
-		final Set< T > set = new HashSet<>( list );
-		return set.size() == list.size();
 	}
 
 }

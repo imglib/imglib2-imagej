@@ -82,7 +82,9 @@ public class ImageProcessorUtils
 	}
 
 	/**
-	 * Returns true if the given ImgLib2 pixel type is also supported by ImageJ1.
+	 * Returns true if the given ImgLib2 pixel type is also supported by the original ImageJ.
+	 * @param type an ImgLib2 pixel type
+	 * @return true iff that pixel type is also supported in the original ImageJ.
 	 */
 	public static boolean isSupported( final Type< ? > type )
 	{

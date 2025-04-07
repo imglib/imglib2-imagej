@@ -57,7 +57,7 @@ public class ImagePlusToImgLib2PerformanceTest
 	{
 		final AtomicInteger counter = new AtomicInteger();
 		final ImagePlus image = countingImagePlus( counter );
-		final Img< ? extends RealType< ? > > img = net.imglib2.imagej.ImagePlusToImgPlus.wrapByte( image );
+		final Img< ? extends RealType< ? > > img = net.imglib2.imagej.ImagePlusToImg.wrapByteCached( image );
 		runFlatIteration( img );
 		assertTrue( counter.get() < 120 ); // don't call getProcessor too often
 	}
@@ -67,7 +67,7 @@ public class ImagePlusToImgLib2PerformanceTest
 	{
 		final AtomicInteger counter = new AtomicInteger();
 		final ImagePlus image = countingImagePlus( counter );
-		final Img< ? extends RealType< ? > > img = ImagePlusToImgPlus.wrapByte( image );
+		final Img< ? extends RealType< ? > > img = ImagePlusToImg.wrapByteCached( image );
 		runFlatIteration( Views.permute( img, 0, 2 ) );
 		assertTrue( counter.get() < 120 ); // don't call getProcessor too often
 	}
@@ -77,7 +77,7 @@ public class ImagePlusToImgLib2PerformanceTest
 	{
 		final AtomicInteger counter = new AtomicInteger();
 		final ImagePlus image = countingImagePlus( counter );
-		final Img< ? extends RealType< ? > > img = net.imglib2.imagej.ImagePlusToImg.wrapByte( image );
+		final Img< ? extends RealType< ? > > img = net.imglib2.imagej.ImagePlusToImg.wrapByteDirect( image );
 		runFlatIteration( Views.permute( img, 0, 2 ) );
 		assertTrue( counter.get() < 120 ); // don't call getProcessor too often
 	}

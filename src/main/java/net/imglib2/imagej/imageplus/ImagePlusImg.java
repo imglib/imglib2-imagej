@@ -162,25 +162,6 @@ public class ImagePlusImg< T extends NativeType< T >, A extends ArrayDataAccess<
 	 * = ( dimensions.length >= d ) ? dimensions[ d ] : 1; return dim; }
 	 */
 
-	/**
-	 * Compute the minimal required number of dimensions for a given
-	 * {@link ImagePlus}, whereas width and height are always first.
-	 *
-	 * E.g. a gray-scale 2d time series would have three dimensions
-	 * [width,height,frames], a gray-scale 3d stack [width,height,depth] and a
-	 * 2d composite image [width,height,channels] as well. A composite 3d stack
-	 * has four dimensions [width,height,channels,depth], as a time series five
-	 * [width,height,channels,depth,frames].
-	 */
-	protected static long[] reduceDimensions( final ImagePlus imp )
-	{
-		final int[] dimensions = imp.getDimensions();
-		final long[] impDimensions = new long[ dimensions.length ];
-		for ( int d = 0; d < dimensions.length; ++d )
-			impDimensions[ d ] = dimensions[ d ];
-		return reduceDimensions( impDimensions );
-	}
-
 	protected static long[] reduceDimensions( final long[] impDimensions )
 	{
 		/*
