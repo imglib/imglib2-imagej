@@ -35,7 +35,6 @@
 package net.imglib2.imagej.img;
 
 import ij.ImagePlus;
-import net.imagej.ImgPlus;
 import net.imglib2.RandomAccessibleInterval;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.CellImg;
