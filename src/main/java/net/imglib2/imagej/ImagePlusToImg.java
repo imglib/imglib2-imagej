@@ -210,6 +210,8 @@ public class ImagePlusToImg
 	 * Wraps an 8 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
 	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
 	 * needed, and caches them.
+	 * @param image the {@link ImagePlus} to wrap. Must contain unsigned bytes.
+	 * @return a {@link PlanarImg} wrapping {@code image}.
 	 */
 	public static PlanarImg< UnsignedByteType, ByteArray > wrapByteCached(final ImagePlus image )
 	{
@@ -220,6 +222,8 @@ public class ImagePlusToImg
 	 * Wraps a 16 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
 	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
 	 * needed, and caches them.
+	 * @param image the {@link ImagePlus} to wrap. Must contain unsigned shorts.
+	 * @return a {@link PlanarImg} wrapping {@code image}.
 	 */
 	public static PlanarImg< UnsignedShortType, ShortArray > wrapShortCached(final ImagePlus image )
 	{
@@ -230,6 +234,8 @@ public class ImagePlusToImg
 	 * Wraps a 32 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
 	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
 	 * needed, and caches them.
+	 * @param image the {@link ImagePlus} to wrap. Must contain floats.
+	 * @return a {@link PlanarImg} wrapping {@code image}.
 	 */
 	public static PlanarImg< FloatType, FloatArray > wrapFloatCached(final ImagePlus image )
 	{
@@ -240,6 +246,8 @@ public class ImagePlusToImg
 	 * Wraps a 24 bit {@link ImagePlus}, into an {@link PlanarImg}, that is backed
 	 * by a {@link PlanarImg}. The {@link PlanarImg} loads the planes only if
 	 * needed, and caches them.
+	 * @param image the {@link ImagePlus} to wrap. Must contain RGB tuples.
+	 * @return a {@link PlanarImg} wrapping {@code image}.
 	 */
 	public static PlanarImg< ARGBType, IntArray > wrapRGBACached(final ImagePlus image )
 	{
@@ -251,6 +259,8 @@ public class ImagePlusToImg
 	 * {@link PlanarImg}. The {@link PlanarImg} loads the planes only if needed,
 	 * and caches them. The pixel type of the returned image depends on the type
 	 * of the ImagePlus.
+	 * @param image the {@link ImagePlus} to wrap
+	 * @return a {@link PlanarImg} wrapping {@code image}.
 	 */
 	public static PlanarImg< ?, ? > wrapCached(final ImagePlus image )
 	{

@@ -39,6 +39,7 @@ import ij.VirtualStack;
 import net.imglib2.Interval;
 import net.imglib2.img.basictypeaccess.PlanarAccess;
 import net.imglib2.img.basictypeaccess.array.*;
+import net.imglib2.img.cell.CellImg;
 import net.imglib2.img.planar.PlanarImg;
 import net.imglib2.type.Type;
 import net.imglib2.type.numeric.ARGBType;
@@ -56,7 +57,6 @@ import java.util.stream.IntStream;
  * UnsignedByteType, UnsignedShortType, ARGBType and FloatType.
  *
  * @see ArrayImgToImagePlus
- * @see ImgPlusToImagePlus
  * @see CellImgToImagePlus
  */
 public class PlanarImgToImagePlus extends AbstractVirtualStack
@@ -66,6 +66,8 @@ public class PlanarImgToImagePlus extends AbstractVirtualStack
 
 	/**
 	 * Returns true, if {@link #wrap(PlanarImg, String)} supports the given image.
+	 * @param obj an {@link Object} that may be supported by {@code wrap}
+	 * @return {@code true} iff {@code obj} can be converted into an {@link ImagePlus}.
 	 */
 	public static boolean isSupported( Object obj )
 	{
@@ -89,6 +91,9 @@ public class PlanarImgToImagePlus extends AbstractVirtualStack
 	 * Use {@link #isSupported(Object)} to check if the {@link PlanarImg} is
 	 * supported.
 	 *
+	 * @param img the {@link PlanarImg} to convert
+	 * @param name the {@link String} title to assign to the result
+	 * @return an {@link ImagePlus} wrapping the data in {@code img}
 	 * @see #isSupported(Object)
 	 */
 	public static ImagePlus wrap(PlanarImg< ?, ? > img, String name )

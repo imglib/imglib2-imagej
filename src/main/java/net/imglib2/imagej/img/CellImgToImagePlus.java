@@ -40,6 +40,7 @@ import net.imglib2.FinalDimensions;
 import net.imglib2.RandomAccess;
 import net.imglib2.RandomAccessible;
 import net.imglib2.img.Img;
+import net.imglib2.img.array.ArrayImg;
 import net.imglib2.img.basictypeaccess.array.ArrayDataAccess;
 import net.imglib2.img.cell.AbstractCellImg;
 import net.imglib2.img.cell.Cell;
@@ -61,7 +62,6 @@ import java.util.List;
  * cells contains exactly one image plane), and certain pixel types:
  * UnsignedByteType, UnsignedShortType, ARGBType and FloatType.
  *
- * @see ImgPlusToImagePlus
  * @see PlanarImgToImagePlus
  * @see ArrayImgToImagePlus
  */
@@ -70,6 +70,8 @@ public class CellImgToImagePlus
 
 	/**
 	 * Returns true, if {@link #wrap(CellImg, String)} supports the given image.
+	 * @param obj an {@link Object} that may be supported by {@code wrap}
+	 * @return {@code true} iff {@code obj} can be converted into an {@link ImagePlus}.
 	 */
 	public static boolean isSupported( Object obj )
 	{
@@ -104,6 +106,9 @@ public class CellImgToImagePlus
 	 * by an {@link AbstractCellImg} with planar cells. The pixel type must be
 	 * UnsignedByte-, UnsignedShort-, ARGB- or FloatType. First two axes must be
 	 * X and Y (or unknown).
+	 * @param img the {@link CellImg} to convert
+	 * @param name the {@link String} title to assign to the result
+	 * @return an {@link ImagePlus} wrapping the data in {@code img}
 	 */
 	public static <T extends NativeType<T>, A extends ArrayDataAccess<A>> ImagePlus wrap( CellImg< T, A > img, String name )
 	{

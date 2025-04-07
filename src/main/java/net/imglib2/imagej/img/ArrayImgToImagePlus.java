@@ -53,6 +53,8 @@ public class ArrayImgToImagePlus
 	/**
 	 * Indicates if {@link #wrap(net.imglib2.img.array.ArrayImg, String)} wrap} supports the image.
 	 *
+	 * @param obj an {@link Object} that may be supported by {@code wrap}
+	 * @return {@code true} iff {@code obj} can be converted into an {@link ImagePlus}.
 	 * @see PlanarImgToImagePlus
 	 * @see CellImgToImagePlus
 	 */
@@ -83,6 +85,9 @@ public class ArrayImgToImagePlus
 	 * Use {@link #isSupported(Object)} to check if an {@link ImagePlus} is
 	 * supported.
 	 *
+	 * @param img the {@link ArrayImg} to convert
+	 * @param name the {@link String} title to assign to the result
+	 * @return an {@link ImagePlus} wrapping the data in {@code img}
 	 * @see PlanarImgToImagePlus
 	 * @see CellImgToImagePlus
 	 */

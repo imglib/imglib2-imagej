@@ -149,6 +149,7 @@ public class ImageJVirtualStack< T extends NativeType< T > > extends AbstractVir
 	 * or {@link #setVoxels} will be copied to the wrapped {@link RandomAccessibleInterval}.
 	 * Please note: The {@link ImageProcessor} cannot be used to persistently change the image
 	 * content.
+	 * @param writable iff true, changes to this {@link ImageStack} will be reflected in the wrapped image.
 	 */
 	public void setWritable( final boolean writable )
 	{
@@ -222,7 +223,10 @@ public class ImageJVirtualStack< T extends NativeType< T > > extends AbstractVir
 		return origin;
 	}
 
-	/** Get the underlying ImgLib2 {@link RandomAccessibleInterval}. */
+	/**
+	 * Get the underlying ImgLib2 {@link RandomAccessibleInterval}.
+	 * @return the underlying {@link RandomAccessibleInterval}
+	 */
 	public RandomAccessibleInterval< T > getSource()
 	{
 		return source;
