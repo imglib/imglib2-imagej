@@ -20,10 +20,10 @@ public class LUTToColorTableTest {
         Random r = new Random(0xdeadbeefL);
         byte[] reds = new byte[256];
         r.nextBytes(reds);
-        byte[] blues = new byte[256];
-        r.nextBytes(blues);
         byte[] greens = new byte[256];
         r.nextBytes(greens);
+        byte[] blues = new byte[256];
+        r.nextBytes(blues);
         LUT lut = new LUT(reds, greens, blues);
         ColorTable actual = LUTToColorTable.wrap(lut);
         assertEquals(256, actual.getLength());

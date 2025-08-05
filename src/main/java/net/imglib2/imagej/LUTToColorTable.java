@@ -11,13 +11,15 @@ import java.awt.*;
  * {@link net.imglib2.display.ColorTable}s.
  *
  *
- * @author Stephan Preibisch
- * @author Stephan Saalfeld
- * @author Matthias Arzt
  * @author Gabriel Selzer
  */
 public class LUTToColorTable {
 
+    /**
+     * Wraps (i.e. copyless) {@code lut} into a {@link ColorTable}.
+     * @param lut the {@link LUT} to convert
+     * @return a {@link ColorTable} enclosing {@code lut}
+     */
     public static ColorTable wrap(final LUT lut) {
         return new ColorTable() {
             @Override
