@@ -9,6 +9,11 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
+/**
+ * Tests conversions from {@link ColorTable}s to ImageJ {@link LUT}s.
+ *
+ * @author Gabriel Selzer
+ */
 public class ColorTableToLUTTest {
 
     @Test
