@@ -2,7 +2,6 @@ package net.imglib2.imagej;
 
 import ij.process.LUT;
 import net.imglib2.display.ColorTable;
-import net.imglib2.util.Binning;
 
 /**
  * Provides convenience functions to convert ImgLib2 {@link ColorTable}s into

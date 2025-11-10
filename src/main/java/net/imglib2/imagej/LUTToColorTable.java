@@ -1,10 +1,8 @@
 package net.imglib2.imagej;
 
 import ij.process.LUT;
-import net.imglib2.util.Binning;
 import net.imglib2.display.ColorTable;
-
-import java.awt.*;
+import net.imglib2.util.Binning;
 
 /**
  * Provides convenience functions to wrap ImageJ {@link ij.process.LUT} objects into ImgLib2
