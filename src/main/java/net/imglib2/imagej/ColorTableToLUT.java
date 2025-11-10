@@ -18,6 +18,9 @@ public class ColorTableToLUT {
      * @return a {@link LUT} containing the same color mapping as {@code table}
      */
     public static LUT convert(final ColorTable table) {
+        if (table.getLength() != 256) {
+            throw new IllegalArgumentException("Can only convert ColorTables of length 256 to LUTs");
+        }
         byte[][] data = new byte[3][256];
         for (int bin = 0; bin < 256; bin++) {
             data[ColorTable.RED][bin] = (byte) table.get(ColorTable.RED, bin);
