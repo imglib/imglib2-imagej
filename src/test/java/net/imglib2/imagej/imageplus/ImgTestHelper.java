@@ -34,27 +34,25 @@
 
 package net.imglib2.imagej.imageplus;
 
-import java.util.Random;
-import java.util.function.Function;
-
-import net.imglib2.exception.InvalidDimensionsException;
-import net.imglib2.util.Util;
-import org.junit.Assert;
 import net.imglib2.Cursor;
 import net.imglib2.RandomAccess;
 import net.imglib2.img.Img;
 import net.imglib2.img.ImgFactory;
 import net.imglib2.outofbounds.OutOfBoundsPeriodicFactory;
 import net.imglib2.type.numeric.real.FloatType;
+import net.imglib2.util.Util;
 import net.imglib2.view.ExtendedRandomAccessibleInterval;
 
+import java.util.Random;
+
 /**
- * Helper class for {@link Img} subclass unit tests.
- * 
+ * For of imglib2's {@code ImgTestHelper} for testing {@link Img} subclasses
+ *
  * @author Stephan Preibisch
  * @author Stephan Saalfeld
  * @author Curtis Rueden
  * @author Philipp Hanslovsky
+ * @author Gabriel Selzer
  */
 public class ImgTestHelper
 {
@@ -79,57 +77,7 @@ public class ImgTestHelper
 		return DIM.clone();
 	}
 
-	private static final long[][] INVALID_DIM = {
-			{ -127 },
-			{ 0 },
-			{ -1, 0 },
-			{ -1, 1 },
-			{ -3, -2 },
-			{ 0, 0, 0 },
-			{ -1, 2, 3 },
-			{ 4, -2, 100 },
-			{ 3151, -235, 8341 },
-			{ 34, 5135, 35163, 0 },
-			{ 35135, 3531, -2, 1 },
-	};
-
-	public static void assertInvalidDims( final ImgFactory< ? > factory )
-	{
-		assertInvalidDims( factory::create );
-	}
-
-	public static void assertInvalidDims( final Function< long[], Img< ? > > factory )
-	{
-		for ( final long[] dims : INVALID_DIM )
-			assertInvalidDims( dims, factory );
-	}
-
-	private static void assertInvalidDims( final long[] dims, final Function< long[], Img< ? > > factory )
-	{
-		try
-		{
-			factory.apply( dims );
-		}
-		catch ( final InvalidDimensionsException exception )
-		{
-			Assert.assertArrayEquals( dims, exception.getDimenionsCopy() );
-			return;
-		}
-		catch ( final Throwable exception )
-		{
-
-			Assert.fail( String.format(
-					"Expected exception of type %s but %s was thrown.",
-					InvalidDimensionsException.class.getName(),
-					exception.getClass().getName() ) );
-		}
-
-		Assert.fail( String.format(
-				"Expected exception of type %s but no exception was thrown.",
-				InvalidDimensionsException.class.getName() ) );
-	}
-
-	public static boolean testImg( final long[] size, final ImgFactory< FloatType > factory1, final ImgFactory< FloatType > factory2 )
+    public static boolean testImg( final long[] size, final ImgFactory< FloatType > factory1, final ImgFactory< FloatType > factory2 )
 	{
 		// create the image
 		final Img< FloatType > img1 = factory1.create( size );
@@ -183,15 +131,12 @@ public class ImgTestHelper
 
 			final FloatType t2 = positionable2.get();
 			final FloatType t1 = localizableCursor1.get();
-//			float f1 = t1.getRealFloat();
-//			float f2 = t2.getRealFloat();
 			t2.set( t1 );
-//			positionable2.get().set( localizableCursor1.get() );
 		}
 
 		// copy again to the first image using a LocalizableByDimOutsideCursor
 		// and a LocalizableByDimCursor
-		final ExtendedRandomAccessibleInterval< FloatType, Img< FloatType > > extendedImg2 = new ExtendedRandomAccessibleInterval< FloatType, Img< FloatType > >( img2, new OutOfBoundsPeriodicFactory< FloatType, Img< FloatType > >() );
+		final ExtendedRandomAccessibleInterval< FloatType, Img< FloatType > > extendedImg2 = new ExtendedRandomAccessibleInterval<>( img2, new OutOfBoundsPeriodicFactory<>() );
 		final RandomAccess< FloatType > outsideCursor2 = extendedImg2.randomAccess();
 		localizableCursor1.reset();
 
@@ -212,7 +157,7 @@ public class ImgTestHelper
 				final int distance = i % 5;
 				direction *= -1;
 
-				pos[ i % numDimensions ] += img1.dimension( i % numDimensions ) * distance * direction;
+				pos[ i % numDimensions ] += (int) (img1.dimension( i % numDimensions ) * distance * direction);
 
 				if ( i % 7 == 0 )
 					outsideCursor2.setPosition( pos );
@@ -221,9 +166,6 @@ public class ImgTestHelper
 
 				final FloatType t1 = localizableCursor1.get();
 				final FloatType t2 = outsideCursor2.get();
-
-//				final float f1 = t1.getRealFloat();
-//				final float f2 = t2.getRealFloat();
 
 				t1.set( t2 );
 
@@ -236,9 +178,7 @@ public class ImgTestHelper
 			System.exit( 1 );
 		}
 
-		final boolean success = test( img1, reference );
-
-		return success;
+        return test( img1, reference );
 	}
 
 	private static float[] createReference( final Img< FloatType > img )
