@@ -38,7 +38,6 @@ import static org.junit.Assert.assertTrue;
 
 import net.imglib2.img.array.ArrayImgFactory;
 import net.imglib2.type.numeric.real.FloatType;
-import net.imglib2.util.ImgTestHelper;
 import net.imglib2.util.Util;
 
 import org.junit.Test;
@@ -56,17 +55,15 @@ public class ImagePlusImgTest
 	public void testImagePlusImg()
 	{
 		final long[][] dim = ImgTestHelper.dims();
-		for ( int i = 0; i < dim.length; ++i )
-		{
-			if ( dim[ i ].length < 6 )
-			{
-				assertTrue( "ArrayImg vs ImagePlusImg failed for dim = " + Util.printCoordinates( dim[ i ] ),
-						ImgTestHelper.testImg( dim[ i ], new ArrayImgFactory<>( new FloatType() ), new ImagePlusImgFactory<>( new FloatType() ) ) );
-				assertTrue( "ImagePlusImg vs ArrayImg failed for dim = " + Util.printCoordinates( dim[ i ] ),
-						ImgTestHelper.testImg( dim[ i ], new ImagePlusImgFactory<>( new FloatType() ), new ArrayImgFactory<>( new FloatType() ) ) );
-				assertTrue( "ImagePlusImg vs ImagePlusImg failed for dim = " + Util.printCoordinates( dim[ i ] ),
-						ImgTestHelper.testImg( dim[ i ], new ImagePlusImgFactory<>( new FloatType() ), new ImagePlusImgFactory<>( new FloatType() ) ) );
-			}
-		}
+        for (long[] longs : dim) {
+            if (longs.length < 6) {
+                assertTrue("ArrayImg vs ImagePlusImg failed for dim = " + Util.printCoordinates(longs),
+                        ImgTestHelper.testImg(longs, new ArrayImgFactory<>(new FloatType()), new ImagePlusImgFactory<>(new FloatType())));
+                assertTrue("ImagePlusImg vs ArrayImg failed for dim = " + Util.printCoordinates(longs),
+                        ImgTestHelper.testImg(longs, new ImagePlusImgFactory<>(new FloatType()), new ArrayImgFactory<>(new FloatType())));
+                assertTrue("ImagePlusImg vs ImagePlusImg failed for dim = " + Util.printCoordinates(longs),
+                        ImgTestHelper.testImg(longs, new ImagePlusImgFactory<>(new FloatType()), new ImagePlusImgFactory<>(new FloatType())));
+            }
+        }
 	}
 }
