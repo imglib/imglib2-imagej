@@ -289,7 +289,8 @@ public class ImagePlusToImg
 		final ImagePlusLoader< A > loader = new ImagePlusLoader<>( image, createArrayAccess );
 		final long[] dimensions = getNonTrivialDimensions( image );
 		final PlanarImg< T, A > cached = new PlanarImg<>( loader, dimensions, new Fraction() );
-		cached.setLinkedType( ( (NativeTypeFactory< T, A >) type.getNativeTypeFactory() ).createLinkedType( cached ) );
+        //noinspection unchecked
+        cached.setLinkedType( ( (NativeTypeFactory< T, A >) type.getNativeTypeFactory() ).createLinkedType( cached ) );
 		// TODO: Preserve metadata
 		return cached;
 	}

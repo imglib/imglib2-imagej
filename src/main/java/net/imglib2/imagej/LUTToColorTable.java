@@ -14,7 +14,7 @@ import net.imglib2.util.Binning;
 public class LUTToColorTable {
 
     /**
-     * Wraps (i.e. copyless) {@code lut} into a {@link ColorTable}.
+     * Wraps (i.e. copy-free) {@code lut} into a {@link ColorTable}.
      * @param lut the {@link LUT} to convert
      * @return a {@link ColorTable} enclosing {@code lut}
      */
