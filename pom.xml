@@ -11,7 +11,7 @@
 
 	<groupId>net.imglib2</groupId>
 	<artifactId>imglib2-imagej</artifactId>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.0</version>
 
 	<name>ImgLib2 ImageJ</name>
 	<description>ImgLib2 display logic using ImageJ.</description>
@@ -145,7 +145,7 @@
 	<scm>
 		<connection>scm:git:https://github.com/imglib/imglib2-imagej</connection>
 		<developerConnection>scm:git:git@github.com:imglib/imglib2-imagej</developerConnection>
-		<tag>HEAD</tag>
+		<tag>imglib2-imagej-0.1.0</tag>
 		<url>https://github.com/imglib/imglib2-imagej</url>
 	</scm>
 	<issueManagement>
