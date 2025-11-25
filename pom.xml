@@ -170,9 +170,6 @@ Martin Horn, Steffen Jaensch, Lee Kamentsky, Larry Lindsey, Melissa Linkert,
 Mark Longair, Brian Northan, Nick Perry, Curtis Rueden, Johannes Schindelin,
 Gabriel Selzer, Jean-Yves Tinevez and Michael Zinsmaier.</license.copyrightOwners>
 
-		<!-- NB: Deploy releases to the SciJava Maven repository. -->
-		<releaseProfiles>sign</releaseProfiles>
-
 		<!--
 		NB: Older versions of OpenJDK 11 have a bug in the javadoc tool,
 		which causes errors like:
